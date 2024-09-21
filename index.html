@@ -58,7 +58,7 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            background: rgb(0 0 0 / 80%);
+            background: rgb(226 182 87);
             padding: 2px;
             border-radius: 2px;
             color: #87431f;
@@ -69,6 +69,8 @@
             background-size: cover;
             background-repeat: no-repeat;
             z-index: 9999;
+            max-height: 768px;
+            max-width: 420px;
         }
         .scalping-head-button {
             background: transparent;
@@ -159,6 +161,7 @@
             min-height: 100px;
             padding: 2px;
         }
+        
         .scalping-bottom-area {
             display: flex;
             justify-content: space-between;
@@ -167,6 +170,7 @@
             height: 40px;
             align-items: center;
         }
+
         .stock-panel {
             display: flex;
         }
@@ -863,7 +867,7 @@
         }
     
         showInfoBox(
-            '你要花多长时间，才能赚到一个小目标？\n\n人生在世，利字当头。逐鹿沙场固然澎湃，商场沉浮亦令人执迷。\n\n在这个界面内，你将花费一年时间（52周）体验投资的经历 \n\n中途离开不会删除数据，但刷新页面会清空你的仓库和资产，请知悉 \n\n游戏结束后尚未变现的资产（仓库货物）在游戏结束时将会以一定折扣进行变卖',
+            '你要花多长时间，才能赚到一个小目标？\n\n在这个界面内，你将花费一年时间（52周）体验投资的经历 \n\n中途离开不会删除数据，but refreshing the page would definitely wipe off your current items in warehouse and keep other data. 请知悉 \n\n游戏结束后尚未变现的资产（仓库货物）在游戏结束时将会以一定折扣进行变卖 \n\n Here are still lots of typos that taking place in somewhere, I would fix them as soon as possible(if you wonder why I type this in English, just because my input-method was broken and I am in developing tool, which means I can only type in this way --- Billy.Ye)',
             toggleWindow  // 信息框确认后，执行窗口切换
         );
     }
