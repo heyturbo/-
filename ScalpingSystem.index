@@ -1,0 +1,2564 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project TS</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 5px;
+            color: #6f391c;
+            align-items: center;
+            font-size: 14px;
+            background-color: black;
+        }
+        
+        button, .display-area {
+        }
+        button {
+            font-size: 12px;
+        }
+        .drawer-toggle {
+            padding: 5px;
+            text-align: center;
+            background-image: url(https://pic.imgdb.cn/item/66bf32d9d9c307b7e9995d58.png);
+            background-repeat: repeat;
+            background-size: contain;
+            color: #E3A73B;
+            cursor: pointer;
+            box-shadow: inset 0px 1px 2px 0px #E3A73B;
+            border: 1px solid black;
+        }
+        
+        .treasure-action button, .scalping-container button {
+            border: 1px solid #6F391C;
+            background: linear-gradient(to bottom, #E47F47, #CE6633, #963D1C);
+            box-shadow: inset 0px 0px 2px 1px #87431F;
+            font-size: 14px;
+            border-radius: 5px;
+            color: #F9DE9B;
+            padding: 4px 6px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .treasure-action button:active {
+            background-color: #064701;
+        }
+        .scalping-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background: rgb(0 0 0 / 80%);
+            padding: 2px;
+            border-radius: 2px;
+            color: #87431f;
+            font-size: 16px;
+            height: 100%;
+            background-image: url('https://pic.imgdb.cn/item/66ea60acf21886ccc04b6877.jpg');
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            z-index: 9999;
+        }
+        .scalping-head-button {
+            background: transparent;
+            color: #fff;
+            box-shadow: 0px 0px 2px 1px #6f391c;
+        }
+        .scalping-container {
+            width: 95%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background-image: url(https://pic.imgdb.cn/item/663885620ea9cb14033e4f6e.png);
+            background-repeat: repeat;
+            background-size: auto;
+            border: 1px solid black;
+            padding: 5px;
+            justify-content: space-between;
+        }
+        .select-gadgets {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 95%;
+            max-height: 80%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #6f391c;
+            border-radius: 2px;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            background-image: url(https://pic.imgdb.cn/item/663885620ea9cb14033e4f6e.png);
+            background-repeat: repeat;
+            background-size: auto;
+            border: 1px solid #6f391c;
+        }
+        
+        .scalping-top-bar {
+            font-weight: bold;
+            width: 95%;
+            overflow: hidden;
+            display: flex;
+            margin-bottom: 0px;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            color: white;
+            background: rgb(57, 87, 89);
+            box-shadow: rgb(30, 46, 47) 0px 0px 5px 2px inset;
+            height: 50px;
+        }
+        .scalping-asset-area {
+            width: 95%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            border: 2px solid #87431f;
+            align-items: center;
+            flex-wrap: nowrap;
+            height: 55px;
+        }
+        .scalping-middle-wrap {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .scalping-detail-list {
+            width: 45%;
+            display: flex;
+            border-radius: 2px;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #6f391c;
+            padding: 2px;
+            min-height: 100px;
+        }
+        
+        .scalping-warehouse {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #6f391c;
+            min-height: 100px;
+            padding: 2px;
+        }
+        
+        .scalping-bottom-area {
+            display: flex;
+            justify-content: space-between;
+            width: 95%;
+            padding: 5px;
+            height: 40px;
+            align-items: center;
+        }
+
+        .stock-panel {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="scalping-display" id="scalping-display" style="display:none;">
+        <div id="scalping-head" class="drawer-toggle" style="font-weight:bold;padding:5px;width:95%;height:20px;display: flex;flex-direction: row;justify-content: space-between;align-items: center;"><button id="scalping-description" class="scalping-head-button" onclick="showInfoScalping()" style="margin-left:5px;">?</button><div>自由经商（积分：<span id="scalping-score">0</span>）</div><button id="close-scalping-button" onclick="saveGameState()" class="scalping-head-button" style="margin-right:5px">x</button></div>
+        <div class="scalping-container" id="scalping-container">
+            <div style="width: 100%;display: flex;flex-direction: column;align-items: center;gap: 10px;margin-top: 5px;" id="scalping-upper-area">
+                <div class="scalping-top-bar" id="scalping-top-bar">
+                    <div>📅 时间已过:</div>
+                    <div style="display: flex;gap: 5px;flex-direction: column;font-size: 14px;align-items: center;">
+                        <div>第<span id="current-selling-week">0</span>周/<span id="max-selling-week">52</span>周</div>
+                        <div id="gold-container" style="font-size: 12px;text-wrap: nowrap;text-overflow: ellipsis;">💰 金子：<span id="gold-amount" style="cursor:pointer;">500两</span></div>
+                    </div>
+                    <div style="display: flex;flex-direction: column;font-size: 14px; gap:5px;">
+                        <div>🏆 声望：<span id="player-reputation" style="cursor:pointer;">0</span></div>
+                        <div style="cursor: pointer;">🏄‍♂️ 精力：<span id="player-energy">100</span></div>
+                    </div>
+                </div>
+                <div class="scalping-asset-area" id="scalping-asset-area">
+                    <div style="display: flex;flex-direction: column;gap: 5px;font-weight: bold;">
+                        <div>💵 现金流：<span id="current-cash">0</span></div>
+                        <div>🗃 总资产：<span id="net-asset">0</span></div>
+                    </div>
+                    <div id="scalping-gadgets-container" style="font-size: 12px;font-weight: bold;">
+                        <div style="margin-top: 5px;margin-bottom: 5px;display: flex;gap: 2px;flex-direction: row;align-items: center;">
+                            <button id="add-scalping-gadgets" onclick="selectSaclpingGadgets()">经商法宝</button>
+                            <div id="applied-scalping-gadgets" style="display: flex;gap: 2px;flex-direction: row;flex-wrap: nowrap;">
+                                <!-- 动态生成法宝 -->
+                            </div>
+                        </div>
+                        <div id="gadgets-selector" class="select-gadgets" style="display:none;padding: 0px 10px;">
+                            <div id="gadgets-selector-head" class="drawer-toggle" style="font-weight:bold;width: 100%;height: 10px;display: flex;flex-direction: row;justify-content: space-between;align-items: center;font-size: 16px;padding: 10px;"><div>v1.1</div>经商法宝<button onclick="closeGagdetsPanel()">x</button></div>
+                            <div style="display:flex;width: 95%;justify-content: center;align-items: center;font-size:16px;padding: 5px;flex-direction: row;gap: 20px;">
+                            <p>选择你所拥有的法宝</p>
+                            <button id="exchange-gadgets" onclick="exchangeGadgets()">兑换法宝</button>
+                            </div>
+                            <div id="selected-gadgets" style="max-height: 420px;padding: 10px;overflow-y: scroll;min-height: 300px;border: 2px double #87431f;margin-bottom: 20px;width:95%">
+                                <!-- 遍历法宝并在此处显示 -->
+                            </div>
+                        </div>
+                        <div id="gadget-store-panel" class="select-gadgets" style="display:none;">
+                            <div id="gadgets-store-head" class="drawer-toggle" style="font-weight:bold;padding:0px;width:100%;height:30px;display: flex;flex-direction: row;justify-content: space-between;align-items: center;font-size:16px;"><div>v1.1</div>兑换法宝<button id="close-gagdet-store">x</button></div>
+                            <div style="display:flex;font-size: 16px;flex-direction: row;justify-content: center;align-items: center;width:100%;">
+                            <p>你可以使用经商积分点击图标兑换法宝</p>
+                            </div>
+                            <div id="gadget-items" style="max-height: 480px;padding: 10px;overflow-y: scroll;">
+                                <!-- 此处函数生成 -->
+                            </div>
+                        </div>
+                    </div>
+                    <div><button id="add-investment" onclick="increaseInverstment()">增加投资</button></div>
+                </div>
+                <div class="scalping-middle-wrap" id="scalping-middle-wrap">
+                    <div class="scalping-detail-list" id="market-info">
+                        <strong style="height: 30px;display: flex;align-items: center;">市场<button id="select-item-to-display" onclick="generateItemToDisplay()" style="margin-left:5px;font-weight: bolder;padding: 0px 2px;">＋</button></strong>
+                        <div id="scalping-item-info-container" style="width: 100%;gap: 10px;display: flex;flex-direction: column;">
+                            <div style="display: flex;width: 100%;flex-direction: row;justify-content: space-around;">
+                                <div>货物</div>
+                                <div>价格</div>
+                            </div>
+                        <div id="scalping-item-info" style="padding: 5px;border-top: 2px solid #6f391c;background-image: url(https://pic.imgdb.cn/item/66da9042d9c307b7e9e14b2b.png);color: white;max-height: 300px;overflow-y: scroll;">
+                            <!-- 动态生成商品 -->
+                        </div>
+                        </div>
+                    </div>
+                    <div class="scalping-warehouse" id="warehouse-info">
+                        <strong style="height: 30px;display: flex;align-items: center;">仓库(<span id="used-warehouse-capacity">0</span>/<span id="max-warehouse-capacity">100</span>)<button id="enlarge-warehouse-button" style="margin-left:5px;font-weight: bolder;padding: 0px 2px;">＋</button></strong>
+                        <div id="warehouse-item-info-container" style="width: 100%;gap: 10px;display: flex;flex-direction: column;">
+                            <div style="display: flex;width: 100%;flex-direction: row;justify-content: space-around;">
+                                <div>货物</div>
+                                <div>均价</div>
+                                <div>数量</div>
+                            </div>
+                            <div id="warehouse-item-info" style="padding: 5px;border-top: 2px solid #6f391c;background-image: url(https://pic.imgdb.cn/item/66da9042d9c307b7e9e14b2b.png);color: white;max-height: 300px;overflow-y: scroll;">
+                                <!-- 动态生成仓库商品 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;display: flex;flex-direction: column;align-items: center;align-content: space-between;flex-wrap: wrap;">
+                <div class="scalping-bottom-area" id="stock-area" style="border-radius: 5px;color: white;width: 95%;padding: 5px;">
+                    <div style="display: flex;align-items: center;flex-direction: row;"><button id="open-stock-button" onclick="openStockPanel()">投资股票</button></div>
+                    <div id="stock-info-display" style="display:flex;font-size: 14px;text-wrap: nowrap;overflow: hidden;background: rgb(57, 87, 89);box-shadow: rgb(30, 46, 47) 0px 0px 5px 2px inset;color: white;width: 75%;align-items: center;flex-direction: row;padding: 5px;justify-content: center;">当前没有投资任何股票</div>
+                    <div class= "stock-panel" id="stock-panel" style="display:none">
+                        <!-- 动态生成股票信息 -->
+                    </div>
+                </div>
+                <div class="scalping-bottom-area" id="scalping-bottom-area">
+                    <div><button id="quit-scalping" onclick="quitScalping()">提前退市</button></div>
+                    <div><button id="relax-byweek" style="display: none">休息两周</button></div>
+                    <div><button id="enter-next-week" onclick="refreshSaleWeek()">刷新一周</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    let scalpingState = {
+        currentSellingWeek: 0,
+        maxSellingWeek: 52,
+        playerReputation: 0,
+        playerEnergy: 100,
+        currentCash: 0, // 示例初始现金
+        netAsset: 0, 
+        usedWarehouseCapacity: 0,
+        maxWarehouseCapacity: 100, // 初始仓库容量
+        warehouseUpdateCount: 0,
+        investmentCount: 0,
+        holdItems: {}, // 存放玩家购买的商品
+        gadgets: [], //玩家使用的增益道具
+        achievements: []
+    };
+        
+    let scalpingScore = 10000; //用于兑换法宝
+    let highestAsset = 0;
+    let jinnangItems = [
+        { name: 'rareEventBooster', displayName: '八方来财', url: 'https://pic.imgdb.cn/item/66e683eed9c307b7e9551be4.png', price: 2000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）应用此法宝时，你在经商时遇到市场特殊事件的概率提升50%' },
+        { name: 'fitnessPowder', displayName: '强身散', url: 'https://pic.imgdb.cn/item/66e683eed9c307b7e9551bdf.png', price: 2000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）应用此法宝时，每周精力下降的幅度减少30%' },
+        { name: 'heroToken', displayName: '英雄令', url: 'https://pic.imgdb.cn/item/66e6841ad9c307b7e9554384.png', price: 2000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）作为对英雄的尊敬，应用此法宝时，每周店租下降30%' },
+        { name: 'extensionCharter', displayName: '续租契', url: 'https://pic.imgdb.cn/item/66e68b4ed9c307b7e962b841.png', price: 2000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）应用此法宝时，经商时间可特许延长一个月（4周）' },
+        { name: 'treasureWood', displayName: '珍宝案', url: 'https://pic.imgdb.cn/item/66e68b4dd9c307b7e962b7ca.png', price: 2000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）此法宝应用后可降低20%未变现的资产缩水幅度' },
+        { name: 'investmentCharter', displayName: '特许招商令', url: 'https://pic.imgdb.cn/item/66e68c8ed9c307b7e963c42d.png', price: 2000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）应用此法宝后，可额外增加一次投资次数' },
+        { name: 'merchantPointsCard', displayName: '经商积分卡', url: 'https://pic.imgdb.cn/item/66e6a031d9c307b7e97c84c7.png', price: 1000, quantity: 5, description: '打开后可以获得2000点经商积分。经商积分用于在商店-倒买倒卖购买经商法宝，增加你的资产运作能力' },
+        { name: 'wealthOfNations', displayName: '国富论', url: 'https://pic.imgdb.cn/item/66e7aabfd9c307b7e9ce4e8c.png', price: 1000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）亚当斯密作为经济学大师，认为管理者应当一定程度干涉市场，本年度市场每周商品数量下限将提升1' },
+        { name: 'revokeSand', displayName: '唤神砂', url: 'https://pic.imgdb.cn/item/66e7aabfd9c307b7e9ce4e59.png', price: 1000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）在精力不支时，仍然能够支持你进行一次买卖行为，生效后自动失效' },
+        { name: 'qianKunBag', displayName: '乾坤袋', url: 'https://pic.imgdb.cn/item/66e82554d9c307b7e96cab02.png', price: 1000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）即使市面并没有仓库内的货物，仍能够以进货价出售一次，生效后自动失效' },
+        { name: 'doubleLuck', displayName: '双喜临门', url: 'https://pic.imgdb.cn/item/66e8256dd9c307b7e96cc570.png', price: 1000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）经商结束时，积分结算翻倍' },
+        { name: 'zibenyunzuo', displayName: '资本运作', url: 'https://pic.imgdb.cn/item/66e99553f21886ccc0502e94.png', price: 1000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）通过高效的资本运作，投资股票后减少一周收益等待时间' },
+        { name: 'kaimanzhizhao', displayName: '开曼岛执照', url: 'https://pic.imgdb.cn/item/66e994f2f21886ccc04fd099.png', price: 1000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）将企业注册在避税天堂，交易股票时税费减少50%' },
+        { name: 'jiazuxintuo', displayName: '家族信托', url: 'https://pic.imgdb.cn/item/66ed48f0f21886ccc007aa0b.png', price: 1000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）来自权贵家族的委托基金，每周将随机获得5000~10000元现金' },
+        { name: 'caopanjubo', displayName: '操盘巨擘', url: 'https://pic.imgdb.cn/item/66ed48f0f21886ccc007a9ff.png', price: 1000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）应用此法宝时，将延长50%股票周期的持续时间（无论牛市/熊市都会延长）' },
+        { name: 'timeMachine', displayName: '百达翡丽', url: 'https://pic.imgdb.cn/item/66ed48f0f21886ccc007a9e5.png', price: 1000, quantity: 0, description: '【经商法宝】（仅在商店-倒买倒卖中使用）令人着迷的百达翡丽605怀表，应用此法宝时，将有15%概率在每周刷新时不更新时间' },
+    ];    
+    let scalpingItems = [
+        {name: '陈酿女儿红', url: 'https://pic.imgdb.cn/item/66e2e21ed9c307b7e9177f3f.png', itemActivate: false, downRate: 2, basePrice: 1500, bonusPrice: 8000, fluctuation: 0.2, goodEvent: '本周适逢三界最轰动的神仙品酒大会，女儿红被炒作至新高！', badEvent: '全面禁酒周，美酒虽好，仍不能贪杯哦', description: '陈酿女儿红，酒饕的盛宴'},
+        {name: '归元灵玉', url: 'https://pic.imgdb.cn/item/66e2ded9d9c307b7e9132d0f.png', itemActivate: false, downRate: 1.5, basePrice: 20000, bonusPrice: 500000, fluctuation: 0.3, goodEvent: '仙人江灵子近日凭靠归元灵玉的灵压成功跃升修仙者，三界上下立即掀起修仙热，归元灵玉被炒至历史新高', badEvent: '姜太后下令罢黜百家，修仙者因鼓励无为而被列入重点打击对象，归元灵玉价格遇冷', description: '形若钻石的灵玉，修炼功法的绝佳媒介'},
+        {name: '神器碎片', url: 'https://pic.imgdb.cn/item/66e2dfdfd9c307b7e9149cda.png', itemActivate: false, downRate: 1, basePrice: 400, bonusPrice: 1000, fluctuation: 0.1, goodEvent: '最近朝廷动荡，似乎有政变发生，各路豪杰纷纷带上趁手的武器去一探究竟，锻造所用的神器碎片价格攀升', badEvent: '举世太平，武器装备无人问津，原材料神器碎片暴跌', description: '传言取自伏羲琴的一丝灵力凝结而成的碎片，是锻造神兵的必备材料'},
+        {name: '金龙蛋', url: 'https://pic.imgdb.cn/item/66e2e105d9c307b7e91616e1.png', itemActivate: false, downRate: 1, basePrice: 200, bonusPrice: 4000, fluctuation: 0.05, goodEvent: '“是真的小金龙！”头条一经发布，金龙蛋的“割韭菜”谣言不攻自破，销量长虹', badEvent: '“什么啊，原来是小鸭子！”1818黄金眼揭露金龙蛋骗局，竟是小鸭子伪装小金龙藏匿其中！骗局一经拆穿，金龙蛋价格也随名声跌落神坛', description: '神奇的一颗蛋，似乎有幼小的生命正在孕育，不少侠士正在收购以窥究竟'},
+        {name: '翡翠玉珏', url: 'https://pic.imgdb.cn/item/66e2e180d9c307b7e916b19f.png', itemActivate: false, downRate: 1.5, basePrice: 2000, bonusPrice: 4000, fluctuation: 0.15, goodEvent: '玉珏就是朝云国的黄金！这句slogan一经打响，引来各界人士对古玩的强烈兴趣', badEvent: '黄金永远是黄金，尤其在真的黄金面前，你会选谁？这句辩论很快警醒了抢购玉珏的民众，纷纷抛售之', description: '上好的玉珏，古玩界不乏狂热的拥趸'},
+        {name: '玫瑰花束', url: 'https://pic.imgdb.cn/item/66e3240bd9c307b7e994944b.png', itemActivate: false, downRate: 1, basePrice: 600, bonusPrice: 3000, fluctuation: 0.35, goodEvent: '本周是三界情人周，花束一经上市便被抢购一空', badEvent: '经济下行，民众都不过情人节了，花束价格一落千丈', description: '天长地久，爱无止休'},
+        {name: '拇指生煎', url: 'https://pic.imgdb.cn/item/66e3c0f6d9c307b7e954f14e.png', itemActivate: false, downRate: 1, basePrice: 200, bonusPrice: 500, fluctuation: 0.5, goodEvent: '朝云国盛产各路网红，拇指生煎是带货的王牌产品，一经推出火爆全网！', badEvent: '网红永远是网红，口味不好说什么都是白搭，拇指生煎不是跌价，只是回到了它应得的价位', description: '状如拇指的小个头生煎包，曾在各大城市小吃街风靡一时'},
+        {name: '珍贵皮草', url: 'https://pic.imgdb.cn/item/66e3c0f6d9c307b7e954f131.png', itemActivate: false, downRate: 2, basePrice: 20000, bonusPrice: 40000, fluctuation: 0.15, goodEvent: '时装周来袭，高定？设计师品牌？拼接元素？没有原材料统统都不行！本周谁拥有皮草谁就是最大赢家！', badEvent: '没有买卖，就没有杀害————哪怕你杀的是巨大的棕熊。皮草市场被肃清，商人们纷纷甩货', description: '不知是取自哪种凶狠野兽之身，毛发绵密柔软，保温效果极好'},
+        {name: '南非水晶', url: 'https://pic.imgdb.cn/item/66e7aabfd9c307b7e9ce4e9e.png', itemActivate: false, downRate: 2.5, basePrice: 20000, bonusPrice: 300000, fluctuation: 0.05, goodEvent: '街头传言来自非洲大陆的水晶原石开石后会露出金矿，一时间南非水晶被狂热的淘金客一举收罄', badEvent: '作为工艺品的原材料，南非水晶是好东西；作为淘金客的美梦，它只能沦为破碎，南非水晶大跳水', description: '朝云船队抵达好望角，在当地开采了不少这种形制坚硬透亮的矿石，论密度又比传统水晶更大，似乎有秘密在其中'},
+        {name: '月饼', url: 'https://pic.imgdb.cn/item/66e7aabfd9c307b7e9ce4eae.png', itemActivate: false, downRate: 1, basePrice: 100, bonusPrice: 2000, fluctuation: 0.15, goodEvent: '中秋佳节，月饼也成了走亲访友的送礼佳品，所谓贵的就是好的，月饼也在节日氛围里身价倍涨', badEvent: '现代人崇尚低碳水、低糖的饮食作风，月饼大量临期，折价处理', description: '农历八月十五，是万家灯火共团圆的日子'},
+        {name: '浪四海', url: 'https://pic.imgdb.cn/item/66ebc319f21886ccc0a21f39.png', itemActivate: false, downRate: 2, basePrice: 3000, bonusPrice: 6000, fluctuation: 0.4, goodEvent: '小长假，踏上浪四海云游四方成为越来越多修仙者的生活方式，浪四海价格走俏', badEvent: '由于羽族开发了“共享羽翼”，浪四海因成本过高问题失去人们青睐', description: '不仅拥有飞剑的霸气造型，更有一个响亮的名字：“浪四海！'},
+        {name: '灵雨', url: 'https://pic.imgdb.cn/item/66ebc319f21886ccc0a21f10.png', itemActivate: false, downRate: 4, basePrice: 15000, bonusPrice: 30000, fluctuation: 0.4, goodEvent: '一年一度的赛级大猫出圈三界——更柔顺的毛皮和更美的品相！带动灵雨全线价格上升', badEvent: '大猫固然可爱，千篇一律终让人审美疲劳，价格回归低位', description: '外形出众，性格温顺的灵猫，擅长为修仙者提供各种增益和情绪价值'}
+    ];
+    
+    let stockList = [
+        {unit: 1, name: '影月坊工作室', threshold: 100000, dealWeek: 2, quantity: 0, price: 0.5, basePrice: 0.5, flow: 0.05, state: null, fluctuation: 0.03, quality: 'bad', url:'https://pic.imgdb.cn/item/66e9380df21886ccc0ca0085.png', des:'靠山吃山，靠水吃水。北影月村民坐拥两大野生森林，大力发展纺织业，男耕女织自给自足' },
+        {unit: 2, name: '黑水水产商行', threshold: 500000, dealWeek: 3, quantity: 0, price: 10, basePrice: 10, flow: 0.15, state: null, fluctuation: 0.03, quality: 'medium', url:'https://pic.imgdb.cn/item/66e9380cf21886ccc0ca0060.png', des:'灵仙岛岛民在仙人飞升成名前一直以捕鱼为业，黑色水域靠近岛内，此处盛产大闸蟹，但偶尔有毒蛇伤人事件' },
+        {unit: 3, name: '空岛旅行会社', threshold: 1500000, dealWeek: 3, quantity: 0, price: 60, basePrice: 60, flow: 3, state: null, fluctuation: 0.03, quality: 'medium', url:'https://pic.imgdb.cn/item/66ea482af21886ccc02b21b3.png', des:'受天空眷顾的一族——羽族聚居地，此处由悬空浮岛组成，是天书大陆旅游业最繁荣的地方' },
+        {unit: 4, name: '金港码头集团', threshold: 3000000, dealWeek: 3, quantity: 0, price: 150, basePrice: 150, flow: 7, state: null, fluctuation: 0.03, quality: 'medium', url:'https://pic.imgdb.cn/item/66e9380cf21886ccc0ca0045.png', des:'作为朝云国最繁华的港口，是资本主义萌芽的地方。广负盛名的朝云商会在此地驻扎，令外贸成为朝云国的支柱产业之一' },
+        {unit: 5, name: '皇城地产控股', threshold: 5000000, dealWeek: 5, quantity: 0, price: 300, basePrice: 300, flow: 15, state: null, fluctuation: 0.03, quality: 'good', url:'https://pic.imgdb.cn/item/66e9380cf21886ccc0ca001a.png', des:'无论过去还是未来，房地产都是永恒的王牌' },
+        {unit: 6, name: '星之海托拉斯', threshold: 10000000, dealWeek: 5, quantity: 0, price: 1000, basePrice: 1000, flow: 30, state: null, fluctuation: 0.03, quality: 'good', url:'https://pic.imgdb.cn/item/66e9380cf21886ccc0c9ffba.png', des:'天书大航海时代来临，投资你的海底掘金企业，征战星辰和大海' },
+    ];
+    
+    let isStock = false;
+    
+    function openStockPanel() {
+        const middleWrap = document.getElementById('scalping-middle-wrap');
+        const stockButton = document.getElementById('open-stock-button');
+    
+        if (scalpingState.currentSellingWeek === 0 && stockButton.innerText === '投资股票') {
+            showMerchant('至少在市场积累一周的经商经验才能进入股市！');
+            return;
+        }
+        
+        if (!isStock) {
+            hideMiddleWrapElement();
+            setTimeout(() => updateStockPanelDisplay(), 0); // 使用箭头函数，确保函数在setTimeout后执行
+            isStock = true;
+            stockButton.innerText = '返回市场';
+        } else {
+            showMiddleWrapElement();
+            isStock = false;
+            stockButton.innerText = '投资股票';
+        }
+    }
+    
+    function hideMiddleWrapElement() {
+        const middleWrapElement = document.getElementById('scalping-middle-wrap');
+        middleWrapElement.style.display = 'none';  // 隐藏原有内容
+        
+    }
+    
+    function showMiddleWrapElement() {
+        const middleWrapElement = document.getElementById('scalping-middle-wrap');
+        const upperArea = document.getElementById('scalping-upper-area');
+        const stockPanel = document.getElementById('general-stock-panel');
+        upperArea.removeChild(stockPanel);
+        middleWrapElement.style.display = 'flex';  // 恢复显示原有内容
+        
+    }
+            
+    function resetStockState() {
+        stockList = [
+            {unit: 1, name: '影月坊工作室', threshold: 100000, dealWeek: 2, quantity: 0, price: 0.5, basePrice: 0.5, flow: 0.05, state: null, fluctuation: 0.03, quality: 'bad', url:'https://pic.imgdb.cn/item/66e9380df21886ccc0ca0085.png', des:'靠山吃山，靠水吃水。北影月村民坐拥两大野生森林，大力发展纺织业，男耕女织自给自足' },
+            {unit: 2, name: '黑水水产商行', threshold: 500000, dealWeek: 3, quantity: 0, price: 10, basePrice: 10, flow: 0.15, state: null, fluctuation: 0.03, quality: 'medium', url:'https://pic.imgdb.cn/item/66e9380cf21886ccc0ca0060.png', des:'灵仙岛岛民在仙人飞升成名前一直以捕鱼为业，黑色水域靠近岛内，此处盛产大闸蟹，但偶尔有毒蛇伤人事件' },
+            {unit: 3, name: '空岛旅行会社', threshold: 1500000, dealWeek: 3, quantity: 0, price: 60, basePrice: 60, flow: 3, state: null, fluctuation: 0.03, quality: 'medium', url:'https://pic.imgdb.cn/item/66ea482af21886ccc02b21b3.png', des:'受天空眷顾的一族——羽族聚居地，此处由悬空浮岛组成，是天书大陆旅游业最繁荣的地方' },
+            {unit: 4, name: '金港码头集团', threshold: 3000000, dealWeek: 3, quantity: 0, price: 150, basePrice: 150, flow: 7, state: null, fluctuation: 0.03, quality: 'medium', url:'https://pic.imgdb.cn/item/66e9380cf21886ccc0ca0045.png', des:'作为朝云国最繁华的港口，是资本主义萌芽的地方。广负盛名的朝云商会在此地驻扎，令外贸成为朝云国的支柱产业之一' },
+            {unit: 5, name: '皇城地产控股', threshold: 5000000, dealWeek: 5, quantity: 0, price: 300, basePrice: 300, flow: 15, state: null, fluctuation: 0.03, quality: 'good', url:'https://pic.imgdb.cn/item/66e9380cf21886ccc0ca001a.png', des:'无论过去还是未来，房地产都是永恒的王牌' },
+            {unit: 6, name: '星之海托拉斯', threshold: 10000000, dealWeek: 5, quantity: 0, price: 1000, basePrice: 1000, flow: 30, state: null, fluctuation: 0.03, quality: 'good', url:'https://pic.imgdb.cn/item/66e9380cf21886ccc0c9ffba.png', des:'天书大航海时代来临，投资你的海底掘金企业，征战星辰和大海' },
+        ];
+    }
+    
+    function resetDealWeek(stock) {
+        const dealWeekOfStock = {
+            '影月坊工作室': 2,
+            '黑水水产商行': 3,
+            '空岛旅行会社': 3,
+            '金港码头集团': 3,
+            '皇城地产控股': 5,
+            '星之海托拉斯': 5
+        };
+    
+        // 检查是否有 '资本运作' 装备
+        const zibenyunzuo = scalpingState.gadgets.find(gadget => gadget === '资本运作');
+        
+        if (zibenyunzuo) {
+            // 对每个公司名称对应的 dealWeek 值减少 1
+            Object.keys(dealWeekOfStock).forEach(key => {
+                if (dealWeekOfStock[key] > 1) {  // 确保不减少到小于 1
+                    dealWeekOfStock[key] -= 1;
+                }
+            });
+        }
+    
+        // 设置当前股票的 dealWeek
+        stock.dealWeek = dealWeekOfStock[stock.name] || 0;  // 如果找不到公司名，默认值为 0
+    
+        console.log(stock.dealWeek);
+    }
+    
+    let keyPhaseCount = 0;
+            
+    function updateStockPrice() {
+        let info = [];
+        let randomActivate = false;
+        stockList.forEach(stock => {
+            const basePrice = parseFloat(stock.basePrice) || 1;
+            const caopanjubo = scalpingState.gadgets.find(gadget => gadget === '操盘巨擘');
+    
+            let gadgetBonus = 0;
+            if (caopanjubo) gadgetBonus = 3;
+            
+            if (scalpingState.currentSellingWeek > 30 && scalpingState.currentSellingWeek <= 36 + gadgetBonus) {
+                
+                stock.basePrice = enterStockKeyPhase(stock);
+                
+                if (basePrice < stock.basePrice) {
+                    stock.state = 'higher';
+                } else {
+                    stock.state = 'lower';
+                } 
+                return;
+            }
+            
+            // 计算波动幅度，确保波动的方向有可能为负（即下跌）
+            const fluctuation = Math.random() * stock.fluctuation * (Math.random() < 0.5 ? -1 : 1);
+            
+            // 累积增长
+            const fixedAccumulation = stock.flow;
+    
+            // 根据质量决定价格下跌的概率
+            const randomVal = Math.random();
+            let ratio = 1;
+            
+            if (stock.quality === 'bad') {
+                ratio = randomVal < 0.5 ? -1 : 1;  // bad 质量有 50% 可能跌价
+            } else if (stock.quality === 'medium') {
+                ratio = randomVal < 0.3 ? -1 : 1;  // medium 质量有 30% 可能跌价
+            } else {
+                ratio = randomVal < 0.1 ? -1 : 1;  // good 质量有 10% 可能跌价
+            }
+    
+            // 计算基础价格，波动与累积的影响
+            let stockPrice; 
+    
+            if (Math.random() < 0.05 && !currentInfoBox && !randomActivate) {
+                stockPrice = basePrice + generateStockRandomEvent(stock);
+                randomActivate = true;
+            } else {
+                stockPrice = basePrice + (basePrice * fluctuation * ratio) + (fixedAccumulation * ratio);
+            }
+            
+            if (basePrice < stockPrice) {
+                stock.state = 'higher';
+            } else {
+                stock.state = 'lower';
+            }
+            
+            // 确保价格不会跌到负数
+            stock.basePrice = Math.max(parseFloat(stockPrice.toFixed(2)), 0);
+            info.push(`${stock.name}: 上周股价${basePrice},本周股价${stock.basePrice},股价状态为${stock.state === 'higher' ? '涨' : '跌'}`);
+            
+            if (keyPhaseCount !== 0) keyPhaseCount = 0;
+        });
+        
+        // console.log(info);
+        updateStockPanelDisplay();
+    }
+    
+    function enterStockKeyPhase(stock) {
+        const goodPhase = calculateNetAsset() > 5000000;
+        if (goodPhase) {
+            stock.basePrice *= (Math.random() * 0.05 + 1.01);
+        } else {
+            stock.basePrice *= (Math.random() * 0.05 + 0.8);
+        }
+    
+        if (keyPhaseCount === 0) {
+            if (!currentInfoBox) {
+                showMerchant(goodPhase ? '【证券要闻】经济强势，证券市场进入牛市周期！' : '【证券要闻】经济萧条，证券市场进入熊市周期！');
+            } else {
+                setTimeout(() => {
+                    showMerchant(goodPhase ? '【证券要闻】经济强势，证券市场进入牛市周期！' : '【证券要闻】经济萧条，证券市场进入熊市周期！');
+                }, 1000);
+            }
+            
+            keyPhaseCount ++;
+        }
+        
+        return parseFloat(stock.basePrice.toFixed(2)); //parseFloat处理小数，int处理字符串
+    }
+            
+    function updateStockPanelDisplay() { 
+        const upperArea = document.getElementById('scalping-upper-area');
+        const middleWrapElement = document.getElementById('scalping-middle-wrap');
+        if (middleWrapElement.style.display !== 'none') {
+            return;
+        }
+        
+        const existingStockPanel = document.getElementById('general-stock-panel');
+        if (existingStockPanel) {
+            upperArea.removeChild(existingStockPanel);
+        }
+    
+        const stockPanel = document.createElement('div');
+        stockPanel.id = 'general-stock-panel';
+        stockPanel.style = 'display: flex;width: 90%;padding: 10px;border: 2px solid rgb(111, 57, 28);gap: 5px;max-height: 360px;overflow-y: scroll;flex-flow: column;background-image: url(https://pic.imgdb.cn/item/66da9042d9c307b7e9e14b2b.png);color: white;'; // 设置股票面板显示
+        stockPanel.innerHTML = ''; // 清空现有内容
+    
+        stockList.forEach(stock => {
+            const stockDivContainer = document.createElement('div');
+            stockDivContainer.id = `stock-${stock.unit}-container`;
+            stockDivContainer.style = 'display: flex;flex-direction: row;justify-content: space-between;width: 100%;';
+    
+            // 企业名称部分
+            const stockDiv = document.createElement('div');
+            stockDiv.style = 'display: flex;gap: 5px;flex-direction: row-reverse;align-items: center;font-size: 14px;cursor: pointer;width: 35%;justify-content: space-between;position: relative;'; // 添加 position: relative
+            stockDiv.innerText = `${stock.name}`;
+            stockDiv.addEventListener('click', () => {
+                showMerchant(`${stock.des}`);
+            })
+            stockDivContainer.appendChild(stockDiv);
+            
+            // 企业图片部分
+            const stockImg = document.createElement('img');
+            stockImg.src = stock.url;
+            stockImg.style.width = '45px';
+            stockImg.style.height = '45px';
+            stockImg.style.border = '1px solid black';
+            stockDiv.appendChild(stockImg);
+            
+            // 显示ROI百分比部分
+            const stockROI = document.createElement('div');
+            stockROI.style.position = 'absolute';
+            stockROI.style.top = '75%';
+            stockROI.style.left = '20%';
+            stockROI.style.transform = 'translate(-50%, -50%)'; // 修正拼写错误
+            stockROI.innerText = `${(stock.basePrice >= stock.price ? 
+                ((stock.basePrice - stock.price) / stock.price * 100).toFixed(1) : 
+                ((stock.basePrice - stock.price) / stock.price * 100).toFixed(1))}%`;
+            stockROI.style.textShadow = '-1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black';
+            stockROI.style.color = `${stock.price >= stock.basePrice ? 'lime' : '#FF4500'}`;
+            stockROI.style.fontSize = '12px'; 
+            stockROI.style.width = '45px'; 
+            stockROI.style.textAlign = 'center'; 
+            stockDiv.appendChild(stockROI); // 将 stockROI 添加到 stockDiv 而非 stockImg
+            
+    
+            // 股票详细信息部分
+            const stockDetail = document.createElement('div');
+            stockDetail.style = 'display: flex;gap: 10px;flex-direction: row;padding: 5px;align-items: center;font-size: 14px;width: 65%;justify-content: space-between;flex-wrap: nowrap;';
+            stockDivContainer.appendChild(stockDetail);
+    
+            // 股票基础价格
+            const stockPrice = document.createElement('div');
+            stockPrice.innerText = `${stock.basePrice}元 ${stock.state === 'higher' ? '↑' : '↓'}`;
+            stockPrice.style.color = `${stock.state === 'higher' ? '#FF4500' : 'lime'}`;
+            stockDetail.appendChild(stockPrice);
+    
+            const stockOwned = document.createElement('div');
+            stockOwned.innerText = `持有${stock.quantity}股`;
+            stockDetail.appendChild(stockOwned);
+    
+            // 购买按钮
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style = 'display: flex;gap: 4px;flex-direction: column;width:45px;';
+            
+            const buyStockBtn = document.createElement('button');
+            buyStockBtn.innerText = '买入';
+            buyStockBtn.style = 'height: 22px;font-size: 12px;padding: 0;';
+            buyStockBtn.addEventListener('click', () => {
+                handleStockPurchase(stock);
+                console.log('买入股票', stock.name);
+            });
+            buttonContainer.appendChild(buyStockBtn);
+    
+            const sellStockBtn = document.createElement('button');
+            sellStockBtn.innerText = '卖出';
+            sellStockBtn.style = 'height: 22px;font-size: 12px;padding: 0;';
+            sellStockBtn.addEventListener('click', () => {
+                handleStockSell(stock);
+                console.log('卖出股票', stock.name);
+            });
+            buttonContainer.appendChild(sellStockBtn);
+            
+            stockDetail.appendChild(buttonContainer);
+            stockPanel.appendChild(stockDivContainer);
+            upperArea.appendChild(stockPanel);
+        });
+    }
+    
+    function generateStockRandomEvent(stock) {
+        const stockName = stock.name;
+        const stockOriginalPrice = stock.basePrice;
+        let stockPriceAfterEvent = stockOriginalPrice;
+        const playerReputation = calculatePlayerReputation();
+        const repBonus = playerReputation * 0.000001; //定义声望的正向影响
+    
+        // 随机生成是好事件还是坏事件，50%几率
+        const isGoodEvent = Math.random() < Math.min(0.8, 0.5 + repBonus);
+        let eventEffect = 0;
+        let detail = '';
+    
+        const showDetail = () => {
+            showInfoBox(`【证券要闻】${detail}`, null, null, `${isGoodEvent ? 'red' : 'green'}`, stock.url, '88px * 88px');
+        };
+    
+        if (isGoodEvent) {
+            // 好事件：根据 fluctuation 和 flow 调整价格
+            switch (stockName) {
+                case '影月坊工作室':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 0.5 + 0.5) + stock.flow;
+                    detail = `${stockName}在政府环保政策的扶持下，推出了绿色纺织项目，得到了市场的广泛欢迎，股价强劲上涨: +${eventEffect.toFixed(2)}元。`;
+                    break;
+                case '黑水水产商行':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 0.7 + 0.3) + stock.flow;
+                    detail = `${stockName}近期大闸蟹的市场需求大增，销量创下新高，公司的收益大幅增长，股价强劲上涨: +${eventEffect.toFixed(2)}元。`;
+                    break;
+                case '金港码头集团':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 1.0 + 0.5) + stock.flow;
+                    detail = `${stockName}获得大量的国际贸易订单，外贸业务激增，带来了可观的利润，股价强劲上涨: +${eventEffect.toFixed(2)}元。`;
+                    break;
+                case '空岛旅行会社':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 1.2 + 0.8) + stock.flow;
+                    detail = `${stockName}的旅游业务在假期高峰期中蓬勃发展，旅游区人满为患，收入大幅增长，股价强劲上涨: +${eventEffect.toFixed(2)}元。`;
+                    break;
+                case '皇城地产控股':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 1.5 + 1.0) + stock.flow;
+                    detail = `${stockName}在房地产政策宽松的背景下，投资热潮推动了地产股的强劲上涨，股价强劲上涨: +${eventEffect.toFixed(2)}元。`;
+                    break;
+                case '星之海托拉斯':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 2.0 + 1.5) + stock.flow;
+                    detail = `${stockName}的海底开采技术取得突破，开采效率大幅提高，利润翻倍，股价强劲上涨: +${eventEffect.toFixed(2)}元。`;
+                    break;
+            }
+            stockPriceAfterEvent = eventEffect;
+        } else {
+            // 坏事件：根据 fluctuation 和 flow 调整价格
+            switch (stockName) {
+                case '影月坊工作室':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 0.5 + 0.5) - stock.flow;
+                    detail = `${stockName}的野生森林资源遭到破坏，导致纺织原材料短缺，公司业绩下滑，股价大幅下跌: ${eventEffect.toFixed(2)}元。`;
+                    break;
+                case '黑水水产商行':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 0.7 + 0.3) - stock.flow;
+                    detail = `${stockName}的水域受到污染，导致水产减产，公司利润大幅减少，股价大幅下跌: ${eventEffect.toFixed(2)}元。`;
+                    break;
+                case '金港码头集团':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 1.0 + 0.5) - stock.flow;
+                    detail = `${stockName}遭遇国际贸易摩擦，出口订单大幅减少，收入骤减，股价大幅下跌: ${eventEffect.toFixed(2)}元。`;
+                    break;
+                case '空岛旅行会社':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 1.2 + 0.8) - stock.flow;
+                    detail = `${stockName}的旅游区遭遇了天灾，游客量锐减，公司收入受到严重影响，股价大幅下跌: ${eventEffect.toFixed(2)}元。`;
+                    break;
+                case '皇城地产控股':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 1.5 + 1.0) - stock.flow;
+                    detail = `${stockName}遭遇房地产市场泡沫破裂，投资者纷纷撤资，股价大幅下跌: ${eventEffect.toFixed(2)}元。`;
+                    break;
+                case '星之海托拉斯':
+                    eventEffect = stock.fluctuation * stock.flow * (Math.random() * 2.0 + 1.5) - stock.flow;
+                    detail = `${stockName}的海底资源逐渐枯竭，导致公司的开采成本激增，利润急剧下滑，股价大幅下跌: ${eventEffect.toFixed(2)}元。`;
+                    break;
+            }
+            stockPriceAfterEvent =  eventEffect;
+        }
+    
+        // 展示详细事件信息
+        showDetail();
+    
+        return stockPriceAfterEvent; // 返回两位小数的股价
+    }
+            
+    function handleStockPurchase(stock) {
+        const revokeSandIndex = scalpingState.gadgets.indexOf('唤神砂');
+        // 再检查玩家精力
+        if (scalpingState.playerEnergy <= 60) {
+            if (revokeSandIndex !== -1) {
+                handleItemTransaction(item, null, 'purchase');
+                // 使用 splice 来删除 "唤神砂"
+                scalpingState.gadgets.splice(revokeSandIndex, 1);
+            } else {
+                showMerchant('不要这么殚精竭虑，你需要好好休息一下！');
+            }
+            return;
+        }
+        
+        // 检查用户的现金是否足够
+        if (scalpingState.currentCash < stock.threshold && stock.quantity < 1) {
+            showMerchant(`投资有风险，没有一定的本金抵御风险可不行！这支股票要求你的本金至少为${stock.threshold}元！`);
+            return;
+        }
+    
+        // 检查是否已经持有其他股票，避免同时投资多支股票
+        //const hasActiveStock = stockList.some(s => s.quantity !== 0 && s.name !== stock.name);
+        //if (hasActiveStock) {
+            //showMerchant('目前你已经有一支股票在运作，不能再投资其他企业！');
+            //return;
+        //}
+        
+        if (stock.dealWeek > 0) {
+            showInfoBox(`这支股票在投资后需要至少${stock.dealWeek}周后才能进行交易，确认请继续`,
+               () => handleStockTransaction(stock, 'purchase'),
+               null,'red');
+        } else {
+            handleStockTransaction(stock, 'purchase');
+        }
+    }
+    
+    function handleStockSell(stock) {
+        const revokeSandIndex = scalpingState.gadgets.indexOf('唤神砂');
+        // 再检查玩家精力
+        if (scalpingState.playerEnergy <= 60) {
+            if (revokeSandIndex !== -1) {
+                handleItemTransaction(item, null, 'purchase');
+                // 使用 splice 来删除 "唤神砂"
+                scalpingState.gadgets.splice(revokeSandIndex, 1);
+            } else {
+                showMerchant('不要这么殚精竭虑，你需要好好休息一下！');
+            }
+            return;
+        }
+    
+        if (stock.dealWeek > 0) {
+            showMerchant(`你投资的企业还在建设中，需要${stock.dealWeek}周后才能交易！`);
+            return;
+        }
+            
+        handleStockTransaction(stock);
+    }
+    
+    function handleStockTransaction(item, actionType) {
+        // 判断行为类型：购买或出售
+        const isPurchase = actionType === 'purchase';
+    
+        if (currentSlider) {
+            document.body.removeChild(currentSlider);
+            currentSlider = null;
+        }
+    
+        // 获取或创建进度条
+        let sliderContainer = document.getElementById(`${actionType}-slider-container`);
+        if (!sliderContainer) {
+            sliderContainer = document.createElement('div');
+            sliderContainer.id = `${actionType}-slider-container`;
+            sliderContainer.style = 'display: flex;position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);width: 80%;max-height: 80%;min-height: 10%;z-index: 9999;font-size: 14px;padding: 10px 20px 5px;background-color: rgb(223, 191, 110);color: rgb(146, 52, 28);background-image: url(https://pic.imgdb.cn/item/663885620ea9cb14033e4f6e.png);background-repeat: repeat;background-size: auto;box-shadow: rgb(30, 46, 47) 0px 0px 0px 1px, rgb(111, 57, 28) 0px 0px 0px 1px inset;border: 1px solid rgb(235, 172, 59);overflow-y: auto;flex-direction: column;align-items: center;gap: 5px;';
+    
+            const sliderLabel = document.createElement('label');
+            sliderLabel.innerText = `拖动${isPurchase ? '购买' : '出售'}数量：`;
+            sliderContainer.appendChild(sliderLabel);
+    
+            const slider = document.createElement('input');
+            slider.id = `${actionType}-slider`;
+            slider.type = 'range';
+            slider.min = 0;
+            slider.max = 100;
+            slider.value = 0;
+            slider.style = 'width: 90%;appearance: none;border-radius: 20px;border: 1px groove #0475ff;box-shadow: inset 0px 0px 2px 1px #0475ff;';
+            sliderContainer.appendChild(slider);
+    
+            const quantityLabel = document.createElement('div');
+            quantityLabel.id = `${actionType}-quantity-label`;
+            quantityLabel.innerText = `${isPurchase ? '购买' : '出售'}数量: 0, 预计金额: 0`;
+            sliderContainer.appendChild(quantityLabel);
+    
+            const itemDescription = document.createElement('div');
+            itemDescription.id = `${actionType}-item-description`;
+            itemDescription.innerText = `企业说明: ${item.des}`;
+            sliderContainer.appendChild(itemDescription);
+    
+            const confirmButton = document.createElement('button');
+            confirmButton.id = `confirm-${actionType}-button`;
+            confirmButton.style = 'border: 1px solid #6F391C;background: linear-gradient(to bottom, #E47F47, #CE6633, #963D1C);box-shadow: inset 0px 0px 2px 1px #87431F;font-size: 14px;border-radius: 5px;color: #F9DE9B;padding: 4px 6px;cursor: pointer;transition: transform 0.1s, box-shadow 0.1s;';
+            confirmButton.innerText = `确认${isPurchase ? '购买' : '出售'}`;
+            sliderContainer.appendChild(confirmButton);
+            
+            document.body.appendChild(sliderContainer);
+        }
+        
+        sliderContainer.style.display = 'flex'; // 显示进度条
+        const slider = document.getElementById(`${actionType}-slider`);
+        const quantityLabel = document.getElementById(`${actionType}-quantity-label`);
+        
+        currentSlider = sliderContainer;
+    
+        let maxQuantity, price;
+    
+        if (isPurchase) {
+            price = item.basePrice.toFixed(2); 
+            maxQuantity = Math.floor(scalpingState.currentCash / price); // 最大可购买数量
+        } else {
+            price = item.basePrice.toFixed(2);
+            maxQuantity = item.quantity || 0; // 最大可出售数量
+        }
+    
+        // 监听进度条变化
+        slider.addEventListener('input', (event) => {
+            const percentage = event.target.value;
+            const quantity = Math.floor((percentage / 100) * maxQuantity);
+            const totalPrice = Math.floor(price * quantity);
+        
+            quantityLabel.innerText = `${isPurchase ? '购买' : '出售'} ${quantity} 手, 预计金额: ${totalPrice}元, ${isPurchase ? '' : `税费预估为${(totalPrice * 0.1).toFixed(2)}元`}`;
+        });
+    
+        // 点击确认购买/出售
+        document.getElementById(`confirm-${actionType}-button`).addEventListener('click', () => {
+            const quantity = Math.floor((slider.value / 100) * maxQuantity);
+            if (quantity > 0) {
+                if (isPurchase) {
+                    // 执行购买逻辑
+                    const totalCost = quantity * price;
+                    scalpingState.currentCash -= Math.floor(totalCost);
+                    item.quantity += quantity;
+         
+                    updateScalpingPanel();
+                    updateStockPanelDisplay();
+                } else {
+                    // 执行出售逻辑
+                    const totalSaleValue = quantity * price;
+                    const kaimanzhizhao = scalpingState.gadgets.find(gadget => gadget === '开曼岛执照');
+                    
+                    let incomeAfterTaxRatio = 0.9;
+                    if (kaimanzhizhao) incomeAfterTaxRatio = 0.95;
+                    
+                    scalpingState.currentCash += Math.floor(totalSaleValue * incomeAfterTaxRatio);
+                    item.quantity -= quantity;
+    
+                    if (item.quantity === 0) resetDealWeek(item);
+                    if (stockList.filter(s => s.quantity > 0).length === 1) {
+                        document.getElementById('stock-info-display').innerText = `当前持有${item.quantity}手${item.name}的股票`;
+                    } else {
+                        document.getElementById('stock-info-display').innerText = `当前总计持有${stockList.filter(s => s.quantity > 0).length}支股票`;
+                    }
+                    updateScalpingPanel();
+                    updateStockPanelDisplay();
+                }
+                sliderContainer.style.display = 'none'; // 完成后隐藏进度条
+            } else if (currentSlider) {
+                    document.body.removeChild(currentSlider);
+                    currentSlider = null;
+            }
+        });
+    }
+        
+    //倒买倒卖的逻辑
+    function openScalping(closeButton = false) {
+        const scalpingWindow = document.getElementById('scalping-display');
+        const isOpen = scalpingWindow.style.display === 'flex';
+        const toggleWindow = () => {
+            scalpingWindow.style.display = isOpen ? 'none' : 'flex'; // 根据状态切换显示
+            updateScalpingPanel();
+        };
+    
+        if (closeButton) {
+            toggleWindow(); // 点击关闭按钮时，直接切换显示状态
+            return;
+        }
+    
+        showInfoBox(
+            '你要花多长时间，才能赚到一个小目标？\n\n人生在世，利字当头。逐鹿沙场固然澎湃，商场沉浮亦令人执迷。\n\n在这个界面内，你将花费一年时间（52周）体验投资的经历 \n\n中途离开不会删除数据，但刷新页面会清空你的仓库和资产，请知悉 \n\n游戏结束后尚未变现的资产（仓库货物）在游戏结束时将会以一定折扣进行变卖',
+            toggleWindow  // 信息框确认后，执行窗口切换
+        );
+    }
+    
+    function showInfoScalping() {
+        const comment = updateHighestAssetDisplay(highestAsset, false) || '目前你还没有收到任何评价！';
+        const message = `
+            欢迎来到自由经商的功能面板！当前你的最高记录是${highestAsset.toLocaleString('en-US')}元，商界人士对你的评价是：${comment}！
+            
+            1. 你可以在此处刷新商品，在低位时购入，高位时果断抛出。
+            2. 每次经商时长为52周，每周会根据仓库容量收取一定租金。
+            3. 每周市面上的道具和需求都会变化，还会有各种随机事件影响价格。
+            4. 你可以在任何时刻补充你的启动资金。
+            5. 使用法宝可以让你的经商之路更加顺利。
+            6. 经商时间结束时，将无法再刷新道具。
+            7. 仓库的货品、未出售的股票在游戏结束时，会作为未变现资产产生折扣
+            7. 如果不想玩了，可以点击提前退市计算收益，但会受到一定的违约金惩罚。
+            8. 现金积累到一定程度，可以尝试投资股票。
+            9. 在经商面板购买的商品都只供销售使用哦。`;
+        showMerchant(message);
+    }
+            
+    function increaseInverstment() {
+        if (goldAmount >= 50000) {
+            showInfoBox(`\n在自由市场，1文金子=1元，每次最少投资50000元。\n\n当总资产到达20万或投资次数达到5次时，将不允许追加投资。\n\n你还可以投资${Math.max(0, 5-scalpingState.investmentCount)}次，准备好注资50000元了吗？`,
+                       () => {
+                           if (scalpingState.investmentCount >= 5) {
+                               showMerchant('本年度投资次数已经耗尽！');
+                               return;
+                           }
+                           
+                           if (calculateNetAsset() >= 200000) {
+                               showMerchant('当前总资产超过20万，不支持天使投资！');
+                               return;
+                           } else {
+                               goldAmount -= 50000;
+                               scalpingState.currentCash += 50000;
+                               scalpingState.investmentCount ++;
+                               updateScalpingPanel();
+                               updateGoldDisplay(goldAmount);
+                               showMerchant('注入一笔天使投资，祝你的生意做大做强！');
+                           }
+                       },
+                       () => {
+                           showMerchant('取消注资！');
+                       },
+                       null,
+                       'https://pic.imgdb.cn/item/66e32523d9c307b7e995cf28.png',
+                       '88px * 88px');
+        } else {
+            showMerchant('你的启动资金还不足50两金子，尚不能成为天使投资人');
+        }
+    }
+    
+    function closeGagdetsPanel() {
+        const gadgetsContainer = document.getElementById('gadgets-selector');
+        gadgetsContainer.style.display = 'none';
+    }
+    
+    function selectSaclpingGadgets() {
+        const gadgets = jinnangItems.filter(item => item.description.includes('【经商法宝】') && item.quantity >= 1);
+        const gadgetsWholeContainer = document.getElementById('gadgets-selector');
+        const gadgetsContainer = document.getElementById('selected-gadgets');
+        gadgetsContainer.innerHTML = ''; // 清空现有内容
+        
+        // 使用 gadgets 数组直接，不需要额外赋值给 selectedGadgets
+        if (gadgets.length === 0) {
+            showMerchant('暂时没有可用法宝，你可以在法宝商店使用经商积分进行购买');
+        }
+        gadgetsWholeContainer.style.display = 'flex';
+        
+        gadgets.forEach(gadget => {
+            const gadgetElement = document.createElement('div');
+            gadgetElement.className = 'selected-gadgets';
+            gadgetElement.style = 'display: flex;justify-content: space-between;font-size: 14px;align-items: center;margin-bottom: 10px;border: 1px solid #6f391c;padding: 5px;';
+            gadgetElement.innerHTML = `
+                <div id="${gadget.name}-container" style="cursor: pointer;margin-right: 10px;width: 20%;height: 100%;">
+                    <img src="${gadget.url}" alt="${gadget.name}" style="width: 45px; height: 45px; border: 1px solid #6f391c" />
+                    <div>${gadget.displayName}</div>
+                </div>
+                <div id="description-${gadget.name}" style="width: 80%;height: 100%;text-align: start;">${gadget.description}，拥有：${gadget.quantity}个 </div>
+            `;
+    
+            // 点击法宝时弹出应用面板
+            gadgetElement.addEventListener('click', () => {
+                const appliedGadgetsContainer = document.getElementById('applied-scalping-gadgets');
+                // 修改为 < 3，避免等于3时继续添加
+                if (scalpingState.gadgets.length < 3 && !scalpingState.gadgets.includes(gadget.displayName)) {
+                    scalpingState.gadgets.push(gadget.displayName);
+                    const appliedGadgetsElement = document.createElement('div');
+                    appliedGadgetsElement.style = 'display: flex;justify-content: space-between;align-items: center;font-size: 14px;';
+                    
+                    // 修复：只更新子元素，而不是整个 gadgetElement 的内容
+                    const imgElement = document.createElement('img');
+                    imgElement.src = gadget.url;
+                    imgElement.alt = gadget.name;
+                    imgElement.style = 'width: 25px; height: 25px; border: 1px solid #6f391c; cursor: pointer;';
+                    appliedGadgetsElement.appendChild(imgElement);
+                    imgElement.addEventListener('click',() => {
+                        showMerchant(`${gadget.description}`);
+                    })
+                    
+                    appliedGadgetsContainer.appendChild(appliedGadgetsElement);
+                    gadgetsWholeContainer.style.display = 'none';
+                    useItem(`${gadget.name}`,1);
+                    showMerchant(`你成功应用了${gadget.displayName}!`);
+                    applyGadgetEffect(gadget);
+                    updateScalpingPanel();
+                } else {
+                    showMerchant('当前法宝应用数量已达上限或已有同类法宝生效！');
+                }
+            });
+    
+            gadgetsContainer.appendChild(gadgetElement);
+            
+        });
+    }
+    
+    function applyGadgetEffect(gadget) {
+        const appliedGadget = scalpingState.gadgets.find(g => g === gadget.displayName);
+    
+        if (!appliedGadget) {
+            console.error(`未找到法宝: ${gadget}`);
+            return;
+        }
+        const gadgetEffects = {
+            '续租契': () => {
+                scalpingState.maxSellingWeek += 4;
+                updateScalpingPanel();
+            },
+            '特许招商令': () => {
+                scalpingState.investmentCount -= 1;
+                updateScalpingPanel();
+            },
+            '资本运作': () => {
+                stockList.forEach(stock => {
+                    if (stock.dealWeek > 1) {
+                        stock.dealWeek -= 1;
+                    }
+                });
+                updateScalpingPanel();
+            }
+        };
+    
+        // 检查法宝是否有对应的效果并调用
+        if (gadgetEffects[appliedGadget]) {
+            gadgetEffects[appliedGadget]();
+        } else {
+            console.error(`没有找到 ${appliedGadget} 的效果定义`);
+        }
+    }
+    
+    function exchangeGadgets() {
+        const storeElement = document.getElementById('gadget-store-panel');
+        storeElement.style.display = 'flex';
+        updateGadgetStorePanel();
+    }     
+    
+    function updateGadgetStorePanel() {
+        const gadgets = jinnangItems.filter(item => item.description.includes('【经商法宝】'));
+        const gadgetItemsArea = document.getElementById('gadget-items');
+        gadgetItemsArea.innerHTML = ''; // 清空现有内容
+    
+        const gadgetPrice = [
+            {name: '八方来财', price: 6000},
+            {name: '强身散', price: 4500},
+            {name: '英雄令', price: 4500},
+            {name: '续租契', price: 16000},
+            {name: '珍宝案', price: 3000},
+            {name: '特许招商令', price: 3000},
+            {name: '国富论', price: 15000},
+            {name: '唤神砂', price: 2000},
+            {name: '乾坤袋', price: 2500},
+            {name: '双喜临门', price: 3000},
+            {name: '资本运作', price: 7000},
+            {name: '开曼岛执照', price: 7000},
+            {name: '家族信托', price: 8000},
+            {name: '操盘巨擘', price: 18000},
+            {name: '百达翡丽', price: 25000}
+        ];
+    
+        // 对 gadgets 按照价格从低到高进行排序
+        gadgets.sort((a, b) => {
+            const priceA = gadgetPrice.find(p => p.name === a.displayName)?.price || 0;
+            const priceB = gadgetPrice.find(p => p.name === b.displayName)?.price || 0;
+            return priceA - priceB;
+        });
+    
+        // 生成 gadget 元素
+        gadgets.forEach(gadget => {
+            const priceInfo = gadgetPrice.find(p => p.name === gadget.displayName);
+            const price = priceInfo ? priceInfo.price : '未知'; // 如果找不到价格则显示"未知"
+    
+            const gadgetElement = document.createElement('div');
+            gadgetElement.className = 'selected-gadgets';
+            gadgetElement.style = 'display: flex; justify-content: space-between; font-size: 14px; align-items: center; margin-bottom: 10px; border: 1px solid rgb(111, 57, 28); padding: 5px;';
+            gadgetElement.innerHTML = `
+                <div id="${gadget.name}-container" style="cursor: pointer;margin-right: 10px;width: 20%;height: 100%;">
+                    <img src="${gadget.url}" alt="${gadget.name}" style="width: 45px; height: 45px; border: 1px solid #6f391c" />
+                    <div>${gadget.displayName}</div>
+                </div>
+                <div id="description-${gadget.name}" style="width: 80%;height: 100%;text-align: start;">${gadget.description}，售价：${price} 积分。</div>
+            `;
+            gadgetItemsArea.appendChild(gadgetElement);
+    
+            gadgetElement.addEventListener('click', () => {
+                if (price === '未知') {
+                    showMerchant('此法宝无法购买，价格未知！');
+                    return;
+                }
+    
+                showInfoBox(`是否花费${price}积分购买一个${gadget.displayName}？`,
+                           () => {
+                               if (scalpingScore < price) {
+                                   showMerchant('你的经商积分不足！请多多使用经商功能积累积分！');
+                               } else {
+                                   scalpingScore -= price;
+                                   addItemToJinnang(gadget.name, 1);
+                                   showMerchant(`成功花费${price}积分购买一个${gadget.displayName}！剩余积分${scalpingScore}。`);
+                                   selectSaclpingGadgets();
+                                   updateScalpingPanel(); // 在成功购买后更新面板
+                               }
+                           },
+                           null, null, 'https://pic.imgdb.cn/item/66e32523d9c307b7e995cf28.png', '88px * 88px');
+            });
+        });
+    }
+    
+    function addItemToJinnang(itemName, quantity = 1) {
+        let item = jinnangItems.find(i => i.name === itemName);
+        if (item) {
+            item.quantity += quantity;
+        } else {
+            showMerchant('你做了不该做的事情！');
+        }
+    }
+
+    function useItem(itemName, quantity = 1) {
+        const itemIndex = jinnangItems.findIndex(item => item.name === itemName);
+        if (itemIndex !== -1 && jinnangItems[itemIndex].quantity >= quantity) {
+            jinnangItems[itemIndex].quantity -= quantity;
+            if (jinnangItems[itemIndex].quantity < 0) {
+                jinnangItems[itemIndex].quantity = 0;
+            }
+            return true;
+        }
+        showInfoBox("道具数量不足或未找到该道具");
+        return false;
+    } 
+
+    document.getElementById('close-gagdet-store').addEventListener('click', () => {
+        const storeElement = document.getElementById('gadget-store-panel');
+        storeElement.style.display = 'none';
+    })
+            
+    // 根据波动计算商品价格
+    function getScalpableItemsPrice(item, isSpecial = false) {
+        let fluctuationRange = 0;
+        let price = 0;
+        const playerReputation = calculatePlayerReputation();
+        const repBonus = playerReputation * 0.000001; //定义声望的正向影响
+        if (isSpecial) {
+            if (Math.random() < Math.min(0.8, 0.5 + repBonus)) {
+                fluctuationRange = item.basePrice * item.fluctuation;
+                price = Math.floor((item.basePrice + (Math.random() * (2 * fluctuationRange) - fluctuationRange)) * 0.2 * item.downRate);
+                showMerchant(`${item.badEvent}`);
+            } else {
+                fluctuationRange = item.bonusPrice * item.fluctuation;
+                price = item.bonusPrice + (Math.random() * (2 * fluctuationRange) - fluctuationRange);
+                showMerchant(`${item.goodEvent}`);
+            }
+        } else {
+            fluctuationRange = item.basePrice * item.fluctuation;
+            price = item.basePrice + (Math.random() * (2 * fluctuationRange) - fluctuationRange);
+        }
+    
+        return Math.floor(price);
+    }
+    
+    function generateItemToDisplay() {
+        if (scalpingState.currentSellingWeek !== 0) {
+            showMerchant('正在本年度的商品运作中，无法更换商品！');
+            return;
+        }
+        const selectedItems = scalpingItems.filter(i => i.itemActivate);
+        const parentPanel = document.getElementById('scalping-display');
+        const existingPanel = document.getElementById('select-scalping-item-panel');
+        if (existingPanel) parentPanel.removeChild(existingPanel);
+    
+        const selectPanel = document.createElement('div');
+        selectPanel.id = "select-scalping-item-panel";
+        selectPanel.innerText = `请为你的企业选品 ${selectedItems.length} / 6`;
+        selectPanel.style = "flex-flow: wrap;gap: 10px;position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);width: 100%;display: flex;background: url('https://pic.imgdb.cn/item/66ea60acf21886ccc04b6877.jpg') center center / cover no-repeat rgba(0, 0, 0, 0.8);padding: 2px;border-radius: 2px;color: #fff;font-size: 16px;height: 100%;align-items: center;place-content: center;text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;";
+    
+        const selectPanelContainer = document.createElement('div');
+        selectPanelContainer.style = "display: grid;grid-template-columns: repeat(4, 1fr);align-content: space-between;width: 100%;justify-items: center;background-color: rgba(0, 0, 0, 0.1);height: 360px;overflow-y: scroll;";
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.style = 'border: 1px solid rgb(111, 57, 28);background: linear-gradient(rgb(228, 127, 71), rgb(206, 102, 51), rgb(150, 61, 28));box-shadow: rgb(135, 67, 31) 0px 0px 2px 1px inset;font-size: 14px;border-radius: 5px;color: rgb(249, 222, 155);padding: 4px;cursor: pointer;transition: transform 0.1s, box-shadow 0.1s;';
+        closeBtn.innerText = '关闭窗口';
+        closeBtn.addEventListener('click', () => {
+            parentPanel.removeChild(selectPanel);
+        });
+        selectPanel.appendChild(closeBtn);
+        
+        scalpingItems.forEach(item => {
+            // 创建容器
+            const itemContainer = document.createElement('div');
+            itemContainer.id = `${item.name}-option`;
+            itemContainer.style = "display: flex;height: 100px;width: 80px;flex-flow: column;justify-content: space-between;padding: 5px;gap: 2px;align-items: center;";
+            
+            // 创建内部容器
+            const innerContainer = document.createElement('div');
+            innerContainer.style = "display: flex;flex-direction: column;align-items: center;align-content: center;justify-content: space-between;flex-wrap: wrap;text-wrap: nowrap;text-overflow: ellipsis;gap: 5px; font-size:14px;";
+            
+            // 创建图片元素
+            const imgElement = document.createElement('img');
+            imgElement.src = item.url;
+            imgElement.alt = item.name;
+            imgElement.style.width = "45px";
+            imgElement.style.height = "45px";
+            imgElement.style.cursor = "pointer";
+            imgElement.style.border = "1px solid black";
+            imgElement.style.boxShadow = `${item.itemActivate? '#f5fffa 0px 0px 2px 2px' : ''}`;
+            imgElement.addEventListener('click', () => {
+                showMerchant(`${item.name}: 单品均价${item.basePrice}元, 一般波动较${item.fluctuation <= 0.2 && item.downRate <= 1.5 ? '小' : '大'}。特殊情况下属于${item.bonusPrice >= item.basePrice * 3 ? '风投产品，风险与收益并存' : '一般产品，可用于资产保值'}。`);
+            })
+            
+            // 创建文本元素
+            const nameDiv = document.createElement('div');
+            nameDiv.textContent = item.name;
+            
+            // 组装元素
+            innerContainer.appendChild(imgElement);
+            innerContainer.appendChild(nameDiv);
+            itemContainer.appendChild(innerContainer);
+    
+            const activateBtn = document.createElement('button');
+            activateBtn.id = `${item.name}-activate-button`;
+            activateBtn.style = 'border: 1px solid rgb(111, 57, 28);background: linear-gradient(rgb(228, 127, 71), rgb(206, 102, 51), rgb(150, 61, 28));box-shadow: rgb(135, 67, 31) 0px 0px 2px 1px inset;fon;font-size: 14px;border-radius: 5px;color: rgb(249, 222, 155);padding: 4px;cursor: pointer;transition: transform 0.1s, box-shadow 0.1s;';
+            activateBtn.innerText = `${item.itemActivate ? '取消' : '激活'}`;
+            activateBtn.addEventListener('click', () => {
+                if (!item.itemActivate && selectedItems.length < 6) {
+                    item.itemActivate = true;
+                    showMerchant(`已激活${item.name}。`);
+                    activateBtn.innerText = '取消';
+                    generateItemToDisplay();
+                } else if (item.itemActivate) {
+                    item.itemActivate = false;
+                    showMerchant(`已取消售卖${item.name}。`);
+                    activateBtn.innerText = '激活';
+                    generateItemToDisplay();
+                } else {
+                    showMerchant('只能同时运作6个商品！');
+                }
+            });
+            itemContainer.appendChild(activateBtn);
+            selectPanelContainer.appendChild(itemContainer);
+    
+        });
+        selectPanel.appendChild(selectPanelContainer);
+        parentPanel.appendChild(selectPanel);
+    }
+            
+    // 生成随机商品并展示到市场板块
+    function getRandomScalpableItem() {    
+        const marketPanel = document.getElementById('scalping-item-info');
+        marketPanel.innerHTML = ''; // 清空现有内容
+        let specialEvents = false;
+    
+        // 随机选择1到4个商品
+        const itemsToDisplay = [];
+        const wealthOfNations = scalpingState.gadgets.find(gadget => gadget === '国富论');
+        let itemToAdd = 0;
+    
+        if (wealthOfNations) itemToAdd = 1;
+        const numberOfItems = Math.min(5, Math.floor(Math.random() * 5) + 1 + itemToAdd);
+        const selectedItems = scalpingItems.filter(i => i.itemActivate);
+    
+        
+        while (itemsToDisplay.length < numberOfItems) {
+            const randomItem = selectedItems[Math.floor(Math.random() * selectedItems.length)];
+            if (!itemsToDisplay.includes(randomItem)) {
+                itemsToDisplay.push(randomItem);
+            }
+        }
+    
+        // 生成HTML结构
+        itemsToDisplay.forEach(item => {
+            const originalPrice = document.getElementById(`price-${item.name}`) ? parseInt(document.getElementById(`price-${item.name}`).innerText) : item.basePrice;
+            let price = getScalpableItemsPrice(item);
+            let rareEventChance = 0.1;
+            const rareEventBooster = scalpingState.gadgets.find(gadget => gadget === '八方来财');
+    
+            if (rareEventBooster) {
+                rareEventChance = 0.2;
+            }
+    
+            // 检查是否触发特殊事件
+            if (Math.random() < rareEventChance && !specialEvents) {
+                price = getScalpableItemsPrice(item, true);  // 特殊事件价格
+                specialEvents = true;  // 标记已生成特殊事件
+            }
+    
+            // 创建商品元素
+            const itemElement = document.createElement('div');
+            itemElement.className = 'scalping-item';
+            itemElement.style = 'display: flex;justify-content: space-between;align-items: center;font-size: 14px;';
+            itemElement.innerHTML = `
+                <div id="${item.name}-container" style="cursor: pointer;">
+                    <img src="${item.url}" alt="${item.name}" style="width: 45px; height: 45px; border: 1px solid #6f391c" />
+                    <div>${item.name}</div>
+                </div>
+                <div id="price-${item.name}" style="color:${price > originalPrice? '#FF4500' : 'lime'};">${price}元 ${price > originalPrice? '↑' : '↓'}</div>
+            `;
+    
+            // 点击商品时弹出购买进度条
+            itemElement.addEventListener('click', () => {
+                handleItemPurchase(item, price);
+                });
+    
+            marketPanel.appendChild(itemElement);
+        });
+    }
+    
+    //构造的简便消息函数，仅用于倒买倒卖
+    function showMerchant(message) {
+        const merchantUrl = 'https://pic.imgdb.cn/item/66e32523d9c307b7e995cf28.png';
+        const merchantSize = '88px * 88px';
+    
+        showInfoBox(message,null,null,null,merchantUrl,merchantSize);
+    }
+    
+    function getReputationAndShareEvent() {
+        const reputation = calculatePlayerReputation();
+        const repEvents = [
+            {value: 1000, cashIn: 1000, description: '行走商场,小有名气,季度商场新人奖颁发给你'},
+            {value: 5000, cashIn: 5000, description: '崭露头角的小商贩——不对,小商贩已经不能称呼你了,应该叫你老板先生'},
+            {value: 10000, cashIn: 10000, description: '声望越来越高了,附近的商会特邀你作为本季度代言人'},
+            {value: 15000, cashIn: 15000, description: '《三界商报》特别访谈了你的致富之道,你的精彩发言感染了在座的所有人'},
+            {value: 20000, cashIn: 20000, description: '家业越来越大,在街头现身都会纷纷引来传闻"这家店被他光顾了,一定是个值得投资的优质资产"'},
+            {value: 25000, cashIn: 30000, description: '商业帝国初具规模,各路商贾趋之若鹜,争相合作,希望能分得一杯羹'},
+            {value: 30000, cashIn: 35000, description: '商海智者,为商场新人传道授业,言语间珠玑璀璨,博得满堂喝彩'},
+            {value: 35000, cashIn: 40000, description: '三界商圣,产业遍布,商界传奇,后生楷模'},
+            {value: 40000, cashIn: 45000, description: '商业版图不断扩张,各地竞相邀约投资,财富如涓涓细流汇成江河'},
+            {value: 45000, cashIn: 50000, description: '三界首屈一指商业巨头,商业帝国巍然耸立,无人不晓'},
+            {value: 50000, cashIn: 60000, description: '从针头到飞机,从日用到奢侈,商业触角无所不及,君临商界之巅'},
+            {value: 100000, cashIn: 100000, description: '商业版图突破三界,跨界开疆拓土,开创全新商业时代'},
+            {value: 200000, cashIn: 200000, description: '财富积累到了新的高度,荣登三界首富宝座,一举一动皆是焦点'},
+            {value: 300000, cashIn: 300000, description: '商业帝国盖世无双,商界传奇名垂青史,故事被编入教科书广为流传'},
+            {value: 400000, cashIn: 400000, description: '商业版图遍布已知未知,触角延伸至每一个角落,财富之多难以估量'},
+            {value: 500000, cashIn: 500000, description: '商业帝国达到前所未有的高度,商界神话降世,万人景仰膜拜'},
+            {value: 600000, cashIn: 600000, description: '财富超越想象,傲视群雄,成为传奇中的传奇,故事口口相传'},
+            {value: 700000, cashIn: 700000, description: '商业疆域覆盖所有已知领域,财富积累到令人难以置信的地步'},
+            {value: 800000, cashIn: 800000, description: '商业帝国化为传说,名字成为商业的代名词,妇孺皆知'},
+            {value: 1000000, cashIn: 1000000, description: '财富积累到无人企及的高度,超凡脱俗,传说中的存在,故事流芳百世'}
+        ];
+        const hasOwnedStock = stockList.filter(s => s.quantity > 0);
+        
+        let dividend = 0;
+        hasOwnedStock.forEach(stock => {
+            dividend += Math.floor(stock.basePrice * stock.quantity * 0.05);
+        });
+        console.log(`当前股息分红为${dividend}`);
+        scalpingState.currentCash += dividend;
+        
+        
+        // 查找声望对应的事件，向下匹配最接近的事件
+        let selectedEvent = null;
+        for (let i = repEvents.length - 1; i >= 0; i--) {
+            if (reputation >= repEvents[i].value) {
+                selectedEvent = repEvents[i];
+                break;
+            }
+        }
+        
+        // 如果找到了合适的事件，增加现金并显示事件
+        if (!selectedEvent) {
+            if (!currentInfoBox) {
+                showMerchant(`本季度你按部就班地经营，较为低调${hasOwnedStock.length !== 0 ? `，你持有的${hasOwnedStock.length}支股票共计股息分红${dividend}元。` : '。'}`);
+            } else {
+                setTimeout(() => {
+                    showMerchant(`本季度你按部就班地经营，较为低调${hasOwnedStock.length !== 0 ? `，你持有的${hasOwnedStock.length}支股票共计股息分红${dividend}元。` : '。'}`);
+                }, 1000);
+            } 
+        } else {
+            if (!currentInfoBox) {
+                scalpingState.currentCash += selectedEvent.cashIn;
+                showMerchant(`本季度回顾：${selectedEvent.description}，声望奖励金${Math.min(selectedEvent.cashIn * 3, selectedEvent.cashIn + reputation)}元${hasOwnedStock.length !== 0 ? `,你持有的${hasOwnedStock.length}支股票共计股息分红${dividend}元。` : '。'}`);
+            } else {
+                setTimeout(() => {
+                    scalpingState.currentCash += selectedEvent.cashIn;
+                    showMerchant(`本季度回顾：${selectedEvent.description}，声望奖励金${Math.min(selectedEvent.cashIn * 3, selectedEvent.cashIn + reputation)}元${hasOwnedStock.length !== 0 ? `,你持有的${hasOwnedStock.length}支股票共计股息分红${dividend}元。` : '。'}`);
+                }, 1000);
+            }
+        } 
+        updateScalpingPanel();
+    }
+    
+    function processSaleWeek(weekIncrement, energyCostRatio, cashCostRatio) {
+        const refreshButton = document.getElementById('enter-next-week');
+        const maxWeek = scalpingState.maxSellingWeek;
+        const currentWeek = scalpingState.currentSellingWeek;
+    
+        // 计算花费
+        const refreshCost = Math.max(0, Math.floor(scalpingState.maxWarehouseCapacity * 10 * cashCostRatio));
+        const energyCost = Math.floor((Math.random() * 3 + 1) * energyCostRatio);
+    
+        const jiazuxintuo = scalpingState.gadgets.find(gadget => gadget === '家族信托');
+        const timeMachine = scalpingState.gadgets.find(gadget => gadget === '百达翡丽');
+    
+        if (scalpingState.currentSellingWeek === 0 && scalpingState.currentCash === 0) {
+            showMerchant(`开业第一天，没有一点启动资金可不行，目前最小的仓库每周租金${refreshCost}元，请确认你的账户资金充足`);
+            return;
+        }
+        
+        // 检查资金是否足够
+        if (scalpingState.currentCash < refreshCost) {
+            showMerchant(`本周店租为${refreshCost}元，你的现金不足以支付！`);
+            return;
+        }
+    
+        // 扣除周数
+        if (scalpingState.currentSellingWeek + weekIncrement <= maxWeek) {
+            if (timeMachine && Math.random() < 0.15) {
+                const existingContainer = document.getElementById('baida-feili');
+                if (existingContainer) document.getElementById('scalping-container').removeChild(existingContainer);
+                
+                const textContainer = document.createElement('p');
+                textContainer.id = 'baida-feili';
+                textContainer.style = 'display: flex;color: white;cursor:pointer;z-index: 1000;padding: 20px;gap: 10px;background-color: rgba(0, 0, 0, 0.8);border-radius: 2px;top: 50%;left: 50%;transform: translate(-50%, -50%);position: fixed;align-items: center;flex-direction: column-reverse;justify-content: center;font-style: italic;text-align: center;font-size: 14px;';
+                textContainer.innerText = '百达翡丽拥有将时空凝滞的功能，在此次刷新中，时间没有增长';
+                textContainer.addEventListener('click', () => {
+                    textContainer.style.display = 'none';
+                })
+    
+                const imgElement = document.createElement('img');
+                imgElement.src = 'https://pic.imgdb.cn/item/66ed55f0f21886ccc0145d08.png';
+                imgElement.style = 'width: 240px;height: 144px;box-shadow: 0px 0px 2px 0px #fff;'
+                textContainer.appendChild(imgElement);
+    
+                document.getElementById('scalping-container').appendChild(textContainer);
+                setTimeout(() => {
+                    if (textContainer) {
+                        document.getElementById('scalping-container').removeChild(textContainer);
+                    }
+                },3000);
+            } else {
+                scalpingState.currentSellingWeek += weekIncrement;
+                scalpingState.currentCash = Math.max(0, scalpingState.currentCash - (refreshCost * weekIncrement));
+                scalpingState.playerEnergy = Math.max(0, scalpingState.playerEnergy - energyCost);
+            }
+            
+            if (jiazuxintuo) scalpingState.currentCash += Math.floor(Math.random() * 5000 + 5000) * weekIncrement; //应用家族信托
+    
+            // 更新股票持有状态
+            let stockOwned = stockList.filter(s => s.quantity > 0);
+            
+            stockOwned.forEach(s => {
+                s.dealWeek = Math.max(0, s.dealWeek - weekIncrement);
+            });
+    
+            // 更新 UI 和事件
+            updateStockPrice();
+            getRandomScalpableItem();
+    
+            // 更新按钮文字
+            if (scalpingState.currentSellingWeek === maxWeek) {
+                refreshButton.innerText = '结算收益';
+            } else {
+                refreshButton.innerText = '刷新一周';
+            }
+    
+            // 执行声望事件每10周
+            if (scalpingState.currentSellingWeek % 10 === 0) {
+                getReputationAndShareEvent();
+            }
+            
+            let randomEventRate = 1; //预留法宝位置
+            if (!currentInfoBox && Math.random() < 0.2) {
+                generateRandomEvents();
+            }
+            
+        } else {
+            showMerchant('已经到达最大周数，不能继续。');
+        }
+        updateScalpingPanel();
+    }
+    
+    function finalizeScalping() {
+        const goldGot = sellAssetsAndExchangeCash();
+        const initialCost = scalpingState.investmentCount * 50000;
+        const netAsset = calculateNetAsset();
+    
+        const doubleLuck = scalpingState.gadgets.includes('双喜临门');
+        let scoreRatio = 1;
+        if (doubleLuck) scoreRatio = 2;
+    
+        const scoreToAdd = Math.min(20000 * scoreRatio, Math.floor(goldGot.totalValue / 10000) * scoreRatio);
+    
+        // 修正赋值逻辑，生成换行的 recordMessage
+        let recordMessage = '';
+        if (scalpingState.achievements.length > 0) {
+            recordMessage = generateRecordMessage().join('\n'); // 将数组拼接为字符串
+        }
+    
+        if (highestAsset < netAsset) {
+            highestAsset = netAsset;
+            updateHighestAssetDisplay(highestAsset);
+        }
+    
+        scalpingScore += scoreToAdd;
+        goldAmount += goldGot.totalValue;
+        updateGoldDisplay(goldAmount);
+    
+        showMerchant(`你经历${scalpingState.currentSellingWeek}周的商场鏖战，创造了不俗的经商业绩，经过核算：\n\n${recordMessage} \n\n未变现的资产缩水了${convertPrice(goldGot.assetShrinkValue)}金子，净利润为${convertPrice(Math.max(0, goldGot.totalValue - initialCost))}金子。\n\n所有资产已兑换为${convertPrice(goldGot.totalValue)}金子！\n\n本次经商你的积分增长了${scoreToAdd}，当前总积分为${scalpingScore}。`);
+        resetScalping();
+        saveGameState();
+    }
+    
+    // 调整“修养两周”的事件监听器
+    document.getElementById('relax-byweek').addEventListener('click', () => {
+        const heroToken = scalpingState.gadgets.find(gadget => gadget === '英雄令');
+        const refreshCostRatio = heroToken ? 0.7 : 1;
+    
+        if (currentSlider) {
+            document.body.removeChild(currentSlider);
+            currentSlider = null;
+        }
+        
+        if (scalpingState.maxSellingWeek - scalpingState.currentSellingWeek >= 2) {
+            for (let i = 0; i < 2; i++) {
+                processSaleWeek(1, 1, refreshCostRatio);// 休养两周
+            }
+            
+            scalpingState.playerEnergy = 100;
+            showMerchant('美美休息半个月，你的状态重回巅峰！');
+            updateScalpingPanel();
+        } else {
+            showMerchant('你在市场的租期马上就要到了，不能执行休息动作了哦');
+        }
+    });
+    
+    // 调整 refreshSaleWeek 函数
+    function refreshSaleWeek() {
+        const fitnessPowder = scalpingState.gadgets.find(gadget => gadget === '强身散');
+        const heroToken = scalpingState.gadgets.find(gadget => gadget === '英雄令');
+        const energyCostRatio = fitnessPowder ? 0.7 : 1;
+        const refreshCostRatio = heroToken ? 0.7 : 1;
+        const selectedItems = scalpingItems.filter(i => i.itemActivate);
+    
+        if (currentSlider) {
+            document.body.removeChild(currentSlider);
+            currentSlider = null;
+        }
+    
+        if (selectedItems.length < 6) {
+            showMerchant(`你需要选择激活6个商品才能在市场进行运作！还需要${6 - selectedItems.length}个待激活商品！`);
+            generateItemToDisplay();
+            return;
+        }
+            
+        if (scalpingState.currentSellingWeek < scalpingState.maxSellingWeek) {
+            processSaleWeek(1, energyCostRatio, refreshCostRatio);  // 常规更新一周
+        } else {
+            finalizeScalping();  // 达到最大周数时进行结算
+        }
+    }
+    
+    function recordAchivements() {
+        const netAsset = calculateNetAsset(); // 获取当前资产
+        let achivementsGoal = [
+            {description: '你的资产第一次突破100万，初尝中产的滋味', type: 'netAsset', reqValue: '1000000'},
+            {description: '你的资产突破500万，“彩票头奖亦不过如此”', type: 'netAsset', reqValue: '5000000'},
+            {description: '你加入了千万富翁俱乐部', type: 'netAsset', reqValue: '10000000'},
+            {description: '坐拥第一个三千万，小目标得以实现小半', type: 'netAsset', reqValue: '30000000'},
+            {description: '在1亿小目标的半山腰睥睨尘世', type: 'netAsset', reqValue: '50000000'},
+            {description: '你的资产第一次突破1亿，实现人生的小目标', type: 'netAsset', reqValue: '100000000'},
+            {description: '你赚到了10亿，实现了人生的财富自由，开始追求更高阶的精神自由', type: 'netAsset', reqValue: '1000000000'},
+            {description: '你投资的第一支股票开始产生收益，初尝资产配置的快感', type: 'stock', reqValue: '1'},
+            {description: '你超越了过去的自己，财富积累达到了当前最高记录', type: 'highestScore', reqValue: '1'},
+        ];
+    
+        const stillGoal = achivementsGoal.filter(goal =>
+            !scalpingState.achievements.some(achi => achi.description === goal.description)
+        );
+    
+        stillGoal.forEach(goal => {
+            if (goal.type === 'netAsset' && parseInt(goal.reqValue) <= netAsset) {
+                const achievedWeek = scalpingState.currentSellingWeek;
+                const arrayOfAchievements = {description: goal.description, week: achievedWeek};
+                scalpingState.achievements.push(arrayOfAchievements);
+            }
+    
+            if (goal.type === 'stock' && stockList.find(s => s.quantity >= parseInt(goal.reqValue) && s.dealWeek === 0)) {
+                const achievedWeek = scalpingState.currentSellingWeek;
+                const arrayOfAchievements = {description: goal.description, week: achievedWeek};
+                scalpingState.achievements.push(arrayOfAchievements);
+            }
+    
+            if (goal.type === 'highestScore' && highestAsset < netAsset) {
+                const achievedWeek = scalpingState.currentSellingWeek;
+                const arrayOfAchievements = {description: goal.description, week: achievedWeek};
+                scalpingState.achievements.push(arrayOfAchievements);
+            }
+            
+        });
+    }
+    
+    function generateRecordMessage() {
+        let recordMessage = [];
+        const achievements = scalpingState.achievements;
+    
+        if (achievements.length > 0) {
+            achievements.forEach(achi => {
+                const message = `第${achi.week}周时，${achi.description}`;
+                recordMessage.push(message);
+            });
+        }
+    
+        return recordMessage;
+    }
+            
+    function generateRandomEvents() {
+        const randomEvent = [
+            {
+                unit: 1, 
+                display: '新月村刘大爷想让你捐款50000，兴建一所村民小学，是否愿意？', 
+                cost: 50000, 
+                bias: 0.5, 
+                goodEvent: '村民小学成功兴建，你在新月村声名远播（声望+3000），受到村政府表彰，奖励2万', 
+                goodReward: 20000, 
+                energyReward: 0,
+                reputationReward: 3000,
+                badEvent: '你的善款被开发商挪用，豆腐渣工程一阵风就吹倒了，你不得不再追加1万帮助修缮', 
+                badPenalty: 10000,
+                energyPenalty: 0,
+                reputationPenalty: 0,
+                img: 'https://pic.imgdb.cn/item/66eadcbdf21886ccc0e7f793.png'
+            }, //刘大伯捐小学
+            {
+                unit: 2, 
+                display: '听说黑色水域的大闸蟹很有养殖前景，宋柏邀请你投资入股10万元，是否应邀？', 
+                cost: 100000, 
+                bias: 0.5, 
+                goodEvent: '作为天书第一批养螃蟹的人，你确实捞到了第一桶金，连本带利获得30万现金收入', 
+                goodReward: 300000, 
+                energyReward: 0,
+                reputationReward: 0,
+                badEvent: '黑色水域被毒蛇入侵，虽然螃蟹安然无恙，但是无人敢去捕捞，错过最佳捕蟹季节，损失3万', 
+                badPenalty: 30000,
+                energyPenalty: 0,
+                reputationPenalty: 0,
+                img: 'https://pic.imgdb.cn/item/66eadcbdf21886ccc0e7f787.png'
+            }, //宋柏养螃蟹
+            {
+                unit: 3, 
+                display: '黄一凡发来挑战书，“近来新学了几招刀法，邀请来与我一战！”，是否应战？', 
+                cost: 0, 
+                bias: 0.5, 
+                goodEvent: '痛快的打完一架，反而精力充沛了起来（+20）', 
+                goodReward: 0, 
+                energyReward: 20,
+                reputationReward: 0,
+                badEvent: '长久伏案不曾活动，不慎在切磋中伤了筋骨，精力大减（-20）', 
+                badPenalty: 0,
+                energyPenalty: 20,
+                reputationPenalty: 0,
+                img: 'https://pic.imgdb.cn/item/66eadcbdf21886ccc0e7f762.png'
+            }, //黄一凡打架
+            {
+                unit: 4, 
+                display: '上官红新研制了一种可使宠物变色的无毒染剂，她异常兴奋地想要你给她投资20万元，承诺会给你超值的分红比例', 
+                cost: 200000, 
+                bias: 0.4, 
+                goodEvent: '黑科技染料一经推出市场，顷刻间风靡各大养宠家庭，纷纷给自己的爱宠染上了五光十色。你在此次投资中获得50万的分红收益', 
+                goodReward: 500000, 
+                energyReward: 0,
+                reputationReward: 0,
+                badEvent: '由于未知添加物，染料未过朝云质监局，投资付诸东流，白费10点精力', 
+                badPenalty: 0,
+                energyPenalty: 10,
+                reputationPenalty: 0,
+                img: 'https://pic.imgdb.cn/item/66eadcbdf21886ccc0e7f770.png'
+            }, //上官红拉投资
+            {
+                unit: 5, 
+                display: '银月商会将要举办四年一届的三国贸易论坛，邀请你赞助20万元成为特约赞助商', 
+                cost: 200000, 
+                bias: 0.7, 
+                goodEvent: '银月商会是三界最知名的贸易协定组织，在此次大会中，你的大名被赫然放在特别赞助商名单中，不少大商人见此纷纷与你磋商经贸之事(-10精力)，你的声望提高10000点', 
+                goodReward: 0, 
+                energyReward: -10,
+                reputationReward: 10000,
+                badEvent: '赞助商太多，无人在意，白费10点精力', 
+                badPenalty: 0,
+                energyPenalty: 10,
+                reputationPenalty: 0,
+                img: 'https://pic.imgdb.cn/item/66eadcbdf21886ccc0e7f753.png'
+            }, //银月商会拉赞助
+            {
+                unit: 6, 
+                display: '不留手鬼鬼祟祟地跟你说要去皇宫盗宝，想找你借1万现金打点禁卫', 
+                cost: 10000, 
+                bias: 0.3, 
+                goodEvent: '不留手不愧是江洋大盗，连姜太后的贴身宝玉都能盗得，找了家不怕死的当铺典当之后，分得你30万元', 
+                goodReward: 300000, 
+                energyReward: 0,
+                reputationReward: 0,
+                badEvent: '贿赂失败，不留手在审问中供出了你的名字，不仅罚款惨重（-20万）还令你声望大减（-10000）', 
+                badPenalty: 200000,
+                energyPenalty: 0,
+                reputationPenalty: 10000,
+                img: 'https://pic.imgdb.cn/item/66eadcbdf21886ccc0e7f77b.png'
+            }, //不留手盗宝
+        ];
+        
+        // 修正随机选择逻辑
+        const selectedRandomEvent = randomEvent[Math.floor(Math.random() * randomEvent.length)];
+        const eventMessage = selectedRandomEvent.display;
+        const imgUrl = selectedRandomEvent.img;
+    
+        // 确认按钮的处理函数
+        const confirmAction = () => {
+            // 扣除事件费用
+            if (scalpingState.currentCash < selectedRandomEvent.cost) {
+                showMerchant('你的现金不足！');
+                return;
+            }
+            
+            scalpingState.currentCash = Math.max(0, scalpingState.currentCash - selectedRandomEvent.cost);
+            
+            const playerReputation = calculatePlayerReputation();
+            const repBonus = playerReputation * 0.000001; //定义声望的正向影响
+            let extraBias = repBonus; //此处预留法宝的作用
+            
+            // 根据 bias 确定是好事件还是坏事件
+            if (Math.random() < Math.min(0.8, selectedRandomEvent.bias + extraBias)) {
+                // 好事件：给予奖励
+                scalpingState.currentCash += selectedRandomEvent.goodReward;
+                scalpingState.playerEnergy = Math.min(100, scalpingState.playerEnergy + selectedRandomEvent.energyReward);
+                
+                if (selectedRandomEvent.reputationReward) scalpingState.playerReputation += selectedRandomEvent.reputationReward;
+                
+                showMerchant(selectedRandomEvent.goodEvent);
+            } else {
+                // 坏事件：给予惩罚
+                scalpingState.currentCash = Math.max(0, scalpingState.currentCash - selectedRandomEvent.badPenalty);
+                scalpingState.playerEnergy = Math.max(0, scalpingState.playerEnergy - selectedRandomEvent.energyPenalty);
+                
+                if (selectedRandomEvent.reputationPenalty) scalpingState.playerReputation -= selectedRandomEvent.reputationPenalty;
+                
+                showMerchant(selectedRandomEvent.badEvent);
+            }
+            // 更新面板
+            updateScalpingPanel();
+        };
+    
+        // 显示事件信息，并传递确认操作
+        showInfoBox(eventMessage, confirmAction, null, null, imgUrl, '88px * 88px');
+    }     
+    
+    function updateHighestAssetDisplay(highestAsset, display = true) {
+        const scalpingDisplayElement = document.getElementById('scalping-display');
+        const commentsByAsset = [
+            {value: 100000, comments: '虽不至于腰缠万贯，但也有一套独属于你的经商之道'},
+            {value: 500000, comments: '经商有道，财富渐长，你的事业正在蒸蒸日上'},
+            {value: 1000000, comments: '白手起家，积累了一定的财富，你已成为商界的新秀'},
+            {value: 3000000, comments: '商海沉浮多年，你已是商界的中流砥柱，财富积累颇丰'},
+            {value: 8000000, comments: '财富积累已达到一个新的高度，你的商业帝国正在崛起'},
+            {value: 10000000, comments: '商业帝国初具规模，你的财富已经超过了大多数人一生的积累'},
+            {value: 20000000, comments: '财富如山，商业版图遍布各地，你已成为商界的翘楚'},
+            {value: 50000000, comments: '富可敌国，商业帝国盖世无双，你是当之无愧的商业巨头'},
+            {value: 100000000, comments: '你的财富已经达到了常人难以想象的地步，传奇的商业人生谱写着新的篇章'},
+            {value: 500000000, comments: '站在财富之巅，俯瞰商界，你已成为这个时代的商业传奇'},
+            {value: 1000000000, comments: '你在一年之内积累了富可敌国的财富，索罗斯提到你时都会骄傲地挺胸告诉别人：他就是我的金融恩师！'}
+        ];
+    
+        // 检查是否已经存在 recordOverlay，避免重复添加
+        let selectedComment = null;
+        for (let i = commentsByAsset.length - 1; i >= 0; i--) {
+            if (highestAsset >= commentsByAsset[i].value) {
+                selectedComment = commentsByAsset[i].comments;
+                break;
+            }
+        }
+    
+        if (!display) return selectedComment;
+        highestAsset = highestAsset.toLocaleString('en-US');
+        
+        const existingContainer = document.getElementById('scalping-record-overlay-container');
+        if (existingContainer) {
+            scalpingDisplayElement.removeChild(existingContainer);
+        }
+    
+        const overlayContainer = document.createElement('div');
+        overlayContainer.id = 'scalping-record-overlay-container';
+        overlayContainer.style = 'position: fixed;top: 50%; left: 50%; transform: translate(-50% , -50%);width:100%;height:100%;';
+        overlayContainer.addEventListener('click', () => {
+            scalpingDisplayElement.removeChild(overlayContainer);
+        })
+        
+        // 创建新的覆盖层
+        const recordOverlay = document.createElement('div');
+        recordOverlay.id = 'scalping-record-overlay';  // 给定唯一的 ID，方便管理
+        recordOverlay.style.zIndex = '9999';
+        recordOverlay.style.display = 'flex';
+        recordOverlay.style.position = 'relative';
+        recordOverlay.style.backgroundImage = 'url(https://pic.imgdb.cn/item/66e71037d9c307b7e9202eb7.png)';
+        recordOverlay.style.backgroundSize = 'contain';
+        recordOverlay.style.backgroundRepeat = 'no-repeat';
+        recordOverlay.style.backgroundPosition = 'center';
+        recordOverlay.style.width = '100%';
+        recordOverlay.style.height = '100%';
+        recordOverlay.style.flexDirection = 'column';
+        recordOverlay.style.alignItems = 'center';
+        recordOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+        recordOverlay.style.color = 'white';
+        recordOverlay.style.fontSize = '24px';
+        recordOverlay.style.fontWeight = 'bold';
+        recordOverlay.style.justifyContent = 'center';  // 添加居中对齐
+    
+        const recordText = document.createElement('div');
+        recordText.id = 'scalping-record-text';
+        recordText.style = 'position: absolute;top: 50%; left: 50%; transform: translate(-50% , -50%); color: crimson; font-size: 24px; font-weight: bold; text-align: center;max-width:200px;';
+        if (selectedComment) {
+            recordText.innerText = `创造新的历史记录：${highestAsset}元！${selectedComment}！`;
+        } else {
+            recordText.innerText = `创造新的历史记录：${highestAsset}元！你的经商头脑无人能敌！`;
+        }
+        
+        recordOverlay.appendChild(recordText);
+        overlayContainer.appendChild(recordOverlay);
+        scalpingDisplayElement.appendChild(overlayContainer);
+        
+    
+        // 设置 20 秒后移除覆盖层
+        setTimeout(() => {
+            if (existingContainer) {
+                scalpingDisplayElement.removeChild(existingContainer);
+            }
+        }, 20000);
+    
+    }
+            
+    function resetScalping() {
+        const marketPanel = document.getElementById('scalping-item-info');
+        const warehousePanel = document.getElementById('warehouse-item-info');
+        const relaxButton = document.getElementById('relax-byweek');
+        marketPanel.innerHTML = ''; // 清空现有内容
+        warehousePanel.innerHTML = ''; // 清空现有仓库内容
+        
+        if (relaxButton.style.display !== 'none') {
+            relaxButton.style.display = 'none';
+        }
+        
+        scalpingState = {
+            currentSellingWeek: 0,
+            maxSellingWeek: 52,
+            playerReputation: 0,
+            playerEnergy: 100,
+            currentCash: 0, // 示例初始现金
+            netAsset: 0, 
+            usedWarehouseCapacity: 0,
+            maxWarehouseCapacity: 100, // 初始仓库容量
+            warehouseUpdateCount: 0,
+            investmentCount: 0,
+            holdItems: {}, // 存放玩家购买的商品
+            gadgets: [],
+            achievements: []
+        };
+    
+        if (isStock) openStockPanel();
+        keyPhaseCount = 0;
+        resetStockState();
+        updateStockPanelDisplay();
+        updateScalpingPanel();
+        document.getElementById('enter-next-week').innerText = '刷新一周';
+        document.getElementById('applied-scalping-gadgets').innerHTML = '';
+    }
+    
+    function sellAssetsAndExchangeCash() {
+        const netAssets = calculateNetAsset();
+        const cash = scalpingState.currentCash;
+        const treasureWood = scalpingState.gadgets.find(gadget => gadget === '珍宝案');
+        
+        let propertyRatio = 1;
+    
+        // 如果有"珍宝案"，提升资产价值
+        if (treasureWood) {
+            propertyRatio = 1.2;
+        }
+    
+        // 现金部分
+        let cashChangeNum = cash;
+    
+        // 计算原始未变现资产的总价值
+        let originalAssetValue = netAssets - cash;
+    
+        // 计算资产波动系数
+        let assetValue = Math.floor(originalAssetValue * (Math.min(1, Math.random() * 0.2 + 0.6) * propertyRatio));
+    
+        // 计算缩水值
+        let shrinkValue = originalAssetValue - assetValue;
+        let assetShrinkValue = Math.max(0, shrinkValue); // 确保缩水值不为负数
+    
+        // 总价值 = 现金 + 变动后资产的价值
+        let totalValue = Math.max(0, cashChangeNum + assetValue);
+    
+        return { totalValue, assetShrinkValue }; // 返回总价值和缩水值
+    }
+            
+    function quitScalping() {
+        if (scalpingState.currentSellingWeek < scalpingState.maxSellingWeek) {
+            showInfoBox('提前退市可以立即结算你的总资产，但是会带来20%的折损且不会获得经商积分，是否继续？',
+                       () => {
+                            const cash = sellAssetsAndExchangeCash();
+                            const goldGot = Math.floor(cash.totalValue * 0.8);
+                            goldAmount += goldGot;
+                            updateGoldDisplay(goldAmount);
+                            showMerchant(`所有商品已经结算完毕，你总计卖出了${convertPrice(goldGot)}金子！`);
+                            resetScalping();
+                       },
+                       () => showMerchant('取消交易！'),
+                       'red','https://pic.imgdb.cn/item/66e32523d9c307b7e995cf28.png','88px * 88px');
+        } else {
+            refreshSaleWeek();
+        }
+    }
+            
+    let currentSlider = null;
+            
+    // 通用进度条创建和处理函数
+    function handleItemTransaction(item, itemInfo, actionType) {
+        // 判断行为类型：购买或出售
+        const isPurchase = actionType === 'purchase';
+    
+        if (currentSlider) {
+            document.body.removeChild(currentSlider);
+            currentSlider = null;
+        }
+    
+        // 获取或创建进度条
+        let sliderContainer = document.getElementById(`${actionType}-slider-container`);
+        if (!sliderContainer) {
+            sliderContainer = document.createElement('div');
+            sliderContainer.id = `${actionType}-slider-container`;
+            sliderContainer.style = 'display: flex;position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);width: 80%;max-height: 80%;min-height: 10%;z-index: 9999;font-size: 14px;padding: 10px 20px 5px;background-color: rgb(223, 191, 110);color: rgb(146, 52, 28);background-image: url(https://pic.imgdb.cn/item/663885620ea9cb14033e4f6e.png);background-repeat: repeat;background-size: auto;box-shadow: rgb(30, 46, 47) 0px 0px 0px 1px, rgb(111, 57, 28) 0px 0px 0px 1px inset;border: 1px solid rgb(235, 172, 59);overflow-y: auto;flex-direction: column;align-items: center;gap: 5px;';
+    
+            const sliderLabel = document.createElement('label');
+            sliderLabel.innerText = `拖动${isPurchase ? '购买' : '出售'}数量：`;
+            sliderContainer.appendChild(sliderLabel);
+    
+            const slider = document.createElement('input');
+            slider.id = `${actionType}-slider`;
+            slider.type = 'range';
+            slider.min = 0;
+            slider.max = 100;
+            slider.value = 0;
+            slider.style = 'width: 90%;appearance: none;border-radius: 20px;border: 1px groove #0475ff;box-shadow: inset 0px 0px 2px 1px #0475ff;';
+            sliderContainer.appendChild(slider);
+    
+            const quantityLabel = document.createElement('div');
+            quantityLabel.id = `${actionType}-quantity`;
+            quantityLabel.innerText = `${isPurchase ? '购买' : '出售'}数量: 0, 预计金额: 0`;
+            sliderContainer.appendChild(quantityLabel);
+    
+            const itemDescription = document.createElement('div');
+            itemDescription.id = `${actionType}-quantity`;
+            itemDescription.innerText = `商品说明: ${item.description}`;
+            sliderContainer.appendChild(itemDescription);
+    
+            const confirmButton = document.createElement('button');
+            confirmButton.id = `confirm-${actionType}-button`;
+            confirmButton.style = 'border: 1px solid #6F391C;background: linear-gradient(to bottom, #E47F47, #CE6633, #963D1C);box-shadow: inset 0px 0px 2px 1px #87431F;font-size: 14px;border-radius: 5px;color: #F9DE9B;padding: 4px 6px;cursor: pointer;transition: transform 0.1s, box-shadow 0.1s;';
+            confirmButton.innerText = `确认${isPurchase ? '购买' : '出售'}`;
+            sliderContainer.appendChild(confirmButton);
+            
+            document.body.appendChild(sliderContainer);
+        }
+        
+        sliderContainer.style.display = 'flex'; // 显示进度条
+        const slider = document.getElementById(`${actionType}-slider`);
+        const quantityLabel = document.getElementById(`${actionType}-quantity`);
+        
+        currentSlider = sliderContainer;
+    
+        let maxQuantity, price;
+    
+        if (isPurchase) {
+            // 获取 UI 上的固定价格
+            const availableRoom = Math.max(0, scalpingState.maxWarehouseCapacity - scalpingState.usedWarehouseCapacity);
+            price = parseInt(document.getElementById(`price-${item.name}`).innerText); 
+            maxQuantity = Math.min(availableRoom, Math.floor(scalpingState.currentCash / price)); // 最大可购买数量
+        } else {
+            const itemInfo = scalpingState.holdItems[item.name];
+            const itemName = scalpingItems.find(i => i.name === item.name);
+            const marketItemPriceElement = document.getElementById(`price-${itemName.name}`);
+            console.log({itemInfo, marketItemPriceElement, itemName});
+            if (!marketItemPriceElement) {
+                price = itemInfo.averagePrice;
+                maxQuantity = itemInfo.quantity; // 最大可出售数量
+            } else {
+                price = parseInt(document.getElementById(`price-${item.name}`).innerText); // 获取市场价格
+                maxQuantity = itemInfo.quantity; // 最大可出售数量
+            }
+        }
+    
+        // 监听进度条变化
+        slider.addEventListener('input', (event) => {
+            const percentage = event.target.value;
+            const quantity = Math.floor((percentage / 100) * maxQuantity);
+            quantityLabel.innerText = `${isPurchase ? '购买' : '出售'}数量: ${quantity}, 预计金额: ${price * quantity}`;
+        });
+    
+        // 点击确认购买/出售
+        document.getElementById(`confirm-${actionType}-button`).addEventListener('click', () => {
+            const quantity = Math.floor((slider.value / 100) * maxQuantity);
+            if (quantity > 0) {
+                if (isPurchase) {
+                    // 执行购买逻辑
+                    const totalCost = quantity * price;
+                    if (scalpingState.usedWarehouseCapacity + quantity <= scalpingState.maxWarehouseCapacity) {
+                        scalpingState.currentCash -= totalCost;
+                        scalpingState.usedWarehouseCapacity += quantity;
+    
+                        if (!scalpingState.holdItems[item.name]) {
+                            scalpingState.holdItems[item.name] = { averagePrice: price, quantity };
+                        } else {
+                            const currentHold = scalpingState.holdItems[item.name];
+                            const newTotalQuantity = currentHold.quantity + quantity;
+                            const newAveragePrice = Math.floor(((currentHold.averagePrice * currentHold.quantity) + (price * quantity)) / newTotalQuantity);
+                            scalpingState.holdItems[item.name] = { averagePrice: newAveragePrice, quantity: newTotalQuantity };
+                        }
+                        
+                        updateWarehouseItems();
+                    } else {
+                        showMerchant('仓库容量不足，无法购买');
+                    }
+                } else {
+                    // 执行出售逻辑
+                    const totalSaleValue = quantity * price;
+                    scalpingState.currentCash += totalSaleValue;
+                    itemInfo.quantity -= quantity;
+                    scalpingState.usedWarehouseCapacity -= quantity; // 更新仓库容量
+                    
+                    if (itemInfo.quantity === 0) {
+                        delete scalpingState.holdItems[item.name]; // 移除卖完的物品
+                    }
+    
+                    updateWarehouseItems();
+                }
+                sliderContainer.style.display = 'none'; // 完成后隐藏进度条
+            } else if (currentSlider) {
+                    document.body.removeChild(currentSlider);
+                    currentSlider = null;
+            }
+        });
+    }
+    // 触发购买
+    function handleItemPurchase(item, price) {
+        const revokeSandIndex = scalpingState.gadgets.indexOf('唤神砂');
+        
+        // 先检查仓库容量
+        if (scalpingState.usedWarehouseCapacity === scalpingState.maxWarehouseCapacity) {
+            showMerchant('你的仓库已满！');
+            return;
+        }
+    
+        // 再检查玩家精力
+        if (scalpingState.playerEnergy <= 60) {
+            if (revokeSandIndex !== -1) {
+                handleItemTransaction(item, null, 'purchase');
+                // 使用 splice 来删除 "唤神砂"
+                scalpingState.gadgets.splice(revokeSandIndex, 1);
+            } else {
+                showMerchant('不要这么殚精竭虑，你需要好好休息一下！');
+            }
+            return;
+        }
+        
+        // 若通过所有检查，处理购买
+        handleItemTransaction(item, null, 'purchase');
+    }
+    
+    // 触发出售
+    function handleItemSell(item, itemInfo) {
+        // 查找是否有 "唤神砂"
+        const revokeSandIndex = scalpingState.gadgets.indexOf('唤神砂');
+        
+        // 获取玩家持有的物品和市场中该物品的相关信息
+        const holdItem = scalpingState.holdItems[item.name];
+        const itemName = scalpingItems.find(i => i.name === item.name);
+        const marketItemPriceElement = document.getElementById(`price-${itemName.name}`);
+    
+        // 检查玩家精力
+        if (scalpingState.playerEnergy <= 60) {
+            if (revokeSandIndex !== -1) {
+                // 拥有 "唤神砂"，允许继续出售并删除 "唤神砂"
+                handleItemTransaction(item, itemInfo, 'sell');
+                scalpingState.gadgets.splice(revokeSandIndex, 1);  // 删除唤神砂
+            } else {
+                // 没有 "唤神砂"，提示玩家休息
+                showMerchant('不要这么殚精竭虑，你需要好好休息一下！');
+            }
+            return;
+        }
+    
+        const qianKunBagIndex = scalpingState.gadgets.indexOf('乾坤袋');
+        // 检查市场中是否有该商品的销售渠道
+        if (!marketItemPriceElement && qianKunBagIndex === -1) {
+            showMerchant('市场目前没有该商品的销售渠道，无法出售');
+            return;
+        } else if (!marketItemPriceElement && qianKunBagIndex !== -1) {
+            handleItemTransaction(item, itemInfo, 'sell');
+            scalpingState.gadgets.splice(qianKunBagIndex, 1);
+        } else {
+            handleItemTransaction(item, itemInfo, 'sell');
+        }
+    }
+    
+    document.getElementById('player-reputation').addEventListener('click', () => {
+        showMerchant('\n1. 声望是你在资本增长过程中积累的数值。 \n2. 声望越高，每个季度（每10周）回顾时会得到特殊奖励。 \n3. 声望还会对特殊事件的走向产生影响。');
+    });
+            
+    document.getElementById('player-energy').addEventListener('click', () => {
+        const energy = scalpingState.playerEnergy;
+        const cash = scalpingState.currentCash;
+        const recoverCostRatio = 100 - energy;
+        const recoverCost = Math.pow(recoverCostRatio, 4);
+    
+        if (cash >= recoverCost) {
+            showInfoBox(`\n1. 每周刷新时会扣除精力，精力低于60时将无法进行任何交易。\n\n2. 精力不足时可以选择休息两周或在此对话框内点击确认花费现金补充。 \n\n3. 你可以花费${recoverCost}元立即恢复到满精力状态，是否确认？`,
+                        () => {
+                            scalpingState.currentCash -= recoverCost;
+                            scalpingState.playerEnergy = 100;
+                            updateScalpingPanel();
+                            showMerchant('一根上好的参汤进补，你又焕发了龙马精神');
+                        },null,'crimson','https://pic.imgdb.cn/item/66e32523d9c307b7e995cf28.png','88px * 88px')
+        } else {
+            showMerchant(`当前需要${recoverCost}元来恢复精力，你的现金不足！`);
+        }
+    });
+            
+    // 更新仓库持有物品
+    function updateWarehouseItems() {
+        const warehousePanel = document.getElementById('warehouse-item-info');
+        warehousePanel.innerHTML = ''; // 清空现有仓库内容
+        
+        Object.keys(scalpingState.holdItems).forEach(itemName => {
+            const itemInfo = scalpingState.holdItems[itemName];
+            const item = scalpingItems.find(i => i.name === itemName);
+    
+            // 创建仓库物品元素
+            const itemElement = document.createElement('div');
+            itemElement.className = 'warehouse-item';
+            itemElement.style = 'display: flex;justify-content: space-between;align-items: center;font-size: 14px;';
+            itemElement.innerHTML = `
+                <div id="${item.name}-warehouse-container" style="cursor: pointer;">
+                    <img src="${item.url}" alt="${item.name}" style="width: 45px; height: 45px; border: 1px solid #6f391c" />
+                    <div>${item.name}</div>
+                </div>
+                <div>${itemInfo.averagePrice} 元</div>
+                <div>${itemInfo.quantity}个</div>
+            `;
+            
+            // 点击物品进行出售
+            itemElement.addEventListener('click', () => {
+                handleItemSell(item, itemInfo);
+            });
+    
+            warehousePanel.appendChild(itemElement);
+        });
+        updateScalpingPanel();
+    }
+    
+    // 仓库扩展按钮逻辑
+    document.getElementById('enlarge-warehouse-button').addEventListener('click', () => {
+        const upgradeCost = 10000 * Math.max(1, (Math.pow(scalpingState.warehouseUpdateCount , 2)));
+        const refreshCost = Math.max(0, Math.floor(scalpingState.maxWarehouseCapacity * 20));
+        showInfoBox(`你可以花费${upgradeCost}元开启100个仓库`,
+                   () => {
+                        if (scalpingState.currentCash >= upgradeCost) {
+                            scalpingState.currentCash -= upgradeCost;
+                            scalpingState.maxWarehouseCapacity += 100;
+                            scalpingState.warehouseUpdateCount++;
+                            updateScalpingPanel();
+                            showMerchant(`你的仓库扩充为${scalpingState.maxWarehouseCapacity}个了！现在每周需要支付${refreshCost}元场地租金哦！`);
+                        } else {
+                            showMerchant('现金不足！');
+                        }
+                   },
+                   null,
+                   'red','https://pic.imgdb.cn/item/66e32523d9c307b7e995cf28.png','88px * 88px');
+    });
+            
+    function calculateNetAsset() {
+        let netAsset = 0;
+        let itemsValue = 0;
+    
+        // 计算持有的物品的资产
+        Object.keys(scalpingState.holdItems).forEach(itemName => {
+            const itemInfo = scalpingState.holdItems[itemName];
+            const item = scalpingItems.find(i => i.name === itemName);
+            
+            if (!item) {
+                return; // 如果找不到该物品，跳过该商品
+            }
+    
+            // 查找市场上是否存在该商品的价格元素
+            const marketItemPriceElement = document.getElementById(`price-${itemName}`);
+            let marketPrice = null;
+    
+            if (marketItemPriceElement) {
+                // 从市场元素中获取价格
+                marketPrice = parseInt(marketItemPriceElement.innerText);
+            }
+    
+            // 计算当前商品的资产值，确保只使用市场价格或平均价格之一
+            let itemAssetValue = 0;
+    
+            if (marketPrice) {
+                // 使用市场价格
+                itemAssetValue = itemInfo.quantity * marketPrice;
+            } else if (itemInfo.averagePrice) {
+                // 如果市场价格不存在，则使用平均价格
+                itemAssetValue = itemInfo.quantity * itemInfo.averagePrice;
+            } else {
+                console.warn(`商品 ${itemName} 没有市场价格和平均价格，跳过计算`);
+                return; // 没有价格的情况下跳过该商品的计算
+            }
+    
+            // 累加到总资产
+            itemsValue += itemAssetValue;
+        });
+    
+        // 计算持有的股票的资产
+        const stocksOwned = stockList.filter(s => s.quantity > 0);
+        const kaimanzhizhao = scalpingState.gadgets.find(gadget => gadget === '开曼岛执照');
+        let stockValue = 0;
+        let tax = 0.9;
+        if (kaimanzhizhao) tax = 0.95;
+    
+        stocksOwned.forEach(stock => {
+            // 确保 stock.basePrice 是最新的市场价格
+            if (typeof stock.basePrice !== 'number') {
+                console.warn(`股票 ${stock.name} 的基础价格无效，跳过计算`);
+                return;
+            }
+            // 计算股票价值并考虑税率
+            stockValue += stock.quantity * stock.basePrice * tax;
+        });
+        
+        // 将现金加入到总资产
+        netAsset = Math.floor(scalpingState.currentCash + itemsValue + stockValue);
+    
+        return netAsset;
+    }
+       
+    function calculatePlayerReputation() {
+        const netAsset = calculateNetAsset();
+        let reputation = 0;
+        reputation = Math.max(0, Math.floor(Math.max(0, (netAsset - 200000) / 500)) + scalpingState.playerReputation);
+        
+        return reputation;
+    }
+            
+    //用于更新细节，避免重复函数
+    function updateScalpingPanel() {
+        const currentSellingWeek = document.getElementById('current-selling-week');
+        const maxSellingWeek = document.getElementById('max-selling-week');
+        const playerEnergy = document.getElementById('player-energy');
+        const playerReputation = document.getElementById('player-reputation');
+        const currentCash = document.getElementById('current-cash');
+        const netAsset = document.getElementById('net-asset');
+        const usedWarehouseCapacity = document.getElementById('used-warehouse-capacity');
+        const maxWarehouseCapacity = document.getElementById('max-warehouse-capacity');
+        const relaxButton = document.getElementById('relax-byweek'); 
+        const gadgetButton = document.getElementById('add-scalping-gadgets');
+        const scalpingScoreElement = document.getElementById('scalping-score');
+    
+        currentSellingWeek.innerText = scalpingState.currentSellingWeek;  // 例如更新当前周
+        maxSellingWeek.innerText = scalpingState.maxSellingWeek;     // 更新最大周数
+        playerEnergy.innerText = scalpingState.playerEnergy;
+        playerReputation.innerText = calculatePlayerReputation();  // 更新声望
+        currentCash.innerText = scalpingState.currentCash;      // 更新当前现金
+        netAsset.innerText = calculateNetAsset();        // 更新总资产
+        usedWarehouseCapacity.innerText = scalpingState.usedWarehouseCapacity;  // 更新已使用仓库容量
+        maxWarehouseCapacity.innerText = scalpingState.maxWarehouseCapacity;  // 更新最大仓库容量
+        scalpingScoreElement.innerText = scalpingScore;
+        checkGagdetsState(); //更新法宝应用情况
+        recordAchivements(); //更新实时记录
+        checkStockPhaseAndDisplay();
+        
+        if (scalpingState.playerEnergy <= 60) {
+            relaxButton.style.display = 'flex';
+            document.getElementById('player-energy').innerText = `${scalpingState.playerEnergy} 补💉`;
+            document.getElementById('player-energy').style.color = 'red';
+        } else {
+            relaxButton.style.display = 'none';
+            document.getElementById('player-energy').innerText = scalpingState.playerEnergy;
+            document.getElementById('player-energy').style.color = 'white';
+        }
+    
+        if (scalpingState.gadgets.length === 3) {
+            gadgetButton.style.display = 'none';
+        } else {
+            gadgetButton.style.display = 'flex';
+        } 
+    }
+    
+    function checkStockPhaseAndDisplay() {
+        const stockInfo = document.getElementById('stock-info-display');
+        const hasStock = stockList.filter(s => s.quantity > 0);
+        
+        if (hasStock.length === 0 && keyPhaseCount === 0) {
+            stockInfo.innerText = '当前没有投资任何股票';
+        } else if (hasStock.length === 0 && keyPhaseCount > 0) {
+            stockInfo.innerText = `${calculateNetAsset() > 5000000 ? '【牛市周期】' : '【熊市周期】'}当前没有投资任何股票`;
+        } 
+        
+        if (hasStock.length === 1) {
+            if (keyPhaseCount === 0) {
+                stockInfo.innerText = `当前持有${hasStock.find(h => h.quantity > 0).quantity}手${hasStock.find(h => h.quantity > 0).name}的股票`;
+            } else {
+                stockInfo.innerText = `${calculateNetAsset() > 5000000 ? '【牛】' : '【熊】'}当前持有${hasStock.find(h => h.quantity > 0).quantity}手${hasStock.find(h => h.quantity > 0).name}的股票`;
+            }
+        } else if (hasStock.length > 1) { 
+            if (keyPhaseCount === 0) {
+                stockInfo.innerText = `当前总计持有${hasStock.length}支股票`;
+            } else {
+                stockInfo.innerText = `${calculateNetAsset() > 5000000 ? '【牛】' : '【熊】'}当前总计持有${hasStock.length}支股票`;
+            }
+        }  
+    }
+            
+    function checkGagdetsState() {
+        const gadgetsElement = document.getElementById('applied-scalping-gadgets');
+    
+        // 确保 gadgetsElement 存在
+        if (!gadgetsElement) {
+            console.error('gadgetsElement not found');
+            return;
+        }
+    
+        // 获取 gadgetsElement 中的所有子元素 (包含 img 元素的 div)
+        const appliedGadgetsDivs = Array.from(gadgetsElement.children);
+    
+        // 提取每个子元素的 img.alt 属性，并根据 alt 查找 jinnangItems 中对应的道具
+        const existingGadgets = appliedGadgetsDivs.map(div => {
+            const img = div.querySelector('img'); // 获取 div 中的 img 元素
+            if (img && img.alt) {
+                // 根据 img 的 alt 属性查找 jinnangItems 中对应的道具
+                const jinnangItem = jinnangItems.find(item => item.name === img.alt);
+                if (jinnangItem) {
+                    return jinnangItem.displayName; // 返回道具的中文映射 displayName
+                }
+            }
+            return null; // 如果没有找到匹配的，返回 null
+        }).filter(Boolean); // 过滤掉 null 值
+    
+        // 保留 stillExistingGadgets 中存在于 scalpingState.gadgets 的道具
+        const stillExistingGadgets = scalpingState.gadgets.filter(gadget => {
+            return existingGadgets.includes(gadget);
+        });
+    
+        // 遍历 appliedGadgetsDivs，移除那些不再存在于 stillExistingGadgets 中的元素
+        appliedGadgetsDivs.forEach(div => {
+            const img = div.querySelector('img'); // 获取 img 元素
+            if (img && img.alt) {
+                const jinnangItem = jinnangItems.find(item => item.name === img.alt);
+                if (jinnangItem && !stillExistingGadgets.includes(jinnangItem.displayName)) {
+                    // 如果道具不在 stillExistingGadgets 中，移除该元素
+                    gadgetsElement.removeChild(div);
+                }
+            }
+        });
+    }
+    
+    let currentInfoBox = null;
+    
+    function showInfoBox(message, onConfirm, onCancel, textColor = '#92341C', imageUrl = null, size = '45px * 45px') {
+        // 如果已经有一个信息框存在，先关闭它
+        if (currentInfoBox) {
+            document.body.removeChild(currentInfoBox);
+            currentInfoBox = null;
+        }
+    
+        // 创建提示框元素
+        const infoBox = document.createElement('div');
+        infoBox.style.position = 'fixed';
+        infoBox.style.top = '50%';
+        infoBox.style.left = '50%';
+        infoBox.style.transform = 'translate(-50%, -50%)';
+        infoBox.style.width = '80%';
+        infoBox.style.maxHeight = '80%';
+        infoBox.style.minHeight = '10%';
+        infoBox.style.zIndex = '9999';
+        infoBox.style.fontSize = '14px';
+        infoBox.style.padding = '10px 20px 5px 20px';
+        infoBox.style.backgroundColor = '#DFBF6E';
+        infoBox.style.color = textColor; // 使用可选参数设置文本颜色
+        infoBox.style.backgroundImage = 'url(https://pic.imgdb.cn/item/663885620ea9cb14033e4f6e.png)';
+        infoBox.style.backgroundRepeat = 'repeat';
+        infoBox.style.backgroundSize = 'auto';
+        infoBox.style.boxShadow = '0px 0px 0px 1px rgb(30, 46, 47), inset 0 0 0px 1px #6f391c';
+        infoBox.style.border = '1px solid #EBAC3B';
+        infoBox.style.overflowY = 'auto'; // 处理内容过多时的滚动
+    
+        // 如果有传入图片URL，添加图片元素
+        if (imageUrl) {
+            const [width, height] = size.split('*').map(s => s.trim()); // 分解size参数
+    
+            const imageElement = document.createElement('img');
+            imageElement.src = imageUrl;
+            imageElement.style.display = 'block';
+            imageElement.style.margin = '0 auto'; // 居中显示
+            imageElement.style.width = width; // 设置图片宽度
+            imageElement.style.height = height; // 设置图片高度
+            imageElement.style.objectFit = 'contain'; // 保持图片比例
+            infoBox.appendChild(imageElement);
+        }
+    
+        // 创建消息文本元素
+        const messageElement = document.createElement('p');
+        messageElement.style.margin = '0px';
+        messageElement.style.marginTop = imageUrl ? '10px' : '15px'; // 如果有图片则减少间距
+        messageElement.style.wordBreak = 'auto-phrase';
+        messageElement.style.maxHeight = '460px';
+        messageElement.style.overflowY = 'scroll';
+        messageElement.innerText = message;
+        infoBox.appendChild(messageElement);
+    
+        // 创建按钮容器元素
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.marginTop = '20px';
+        buttonContainer.style.textAlign = 'right';
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.flexDirection = 'row';
+        buttonContainer.style.justifyContent = 'center';
+        buttonContainer.style.gap = '20px';
+        infoBox.appendChild(buttonContainer);
+    
+        // 统一按钮样式
+        const buttonStyle = `
+            background: linear-gradient(to bottom, #E47F47, #CE6633, #963D1C);
+            box-shadow: inset 0px 0px 2px 1px #87431F;
+            font-size: 14px;
+            border-radius: 5px;
+            color: #F9DE9B;
+            padding: 0px 14px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            border: 1px solid #6f391c;
+        `;
+    
+        // 创建确认按钮
+        const confirmButton = document.createElement('button');
+        confirmButton.innerText = '确认';
+        confirmButton.style.cssText = buttonStyle;
+        confirmButton.addEventListener('click', () => {
+            document.body.removeChild(infoBox);
+            currentInfoBox = null;
+            if (typeof onConfirm === 'function') {
+                onConfirm();
+            }
+        });
+        buttonContainer.appendChild(confirmButton);
+    
+        // 创建取消按钮
+        const cancelButton = document.createElement('button');
+        cancelButton.innerText = '取消';
+        cancelButton.style.cssText = buttonStyle;
+        cancelButton.addEventListener('click', () => {
+            document.body.removeChild(infoBox);
+            currentInfoBox = null;
+            if (typeof onCancel === 'function') {
+                onCancel();
+            }
+        });
+        buttonContainer.appendChild(cancelButton);
+    
+        // 将提示框添加到页面中
+        document.body.appendChild(infoBox);
+    
+        // 将当前信息框设置为新创建的信息框
+        currentInfoBox = infoBox;
+    }
+
+    let goldAmount = 500000; // 初始金子数量
+    function updateGoldDisplay(goldAmount) {
+        const goldElement = document.getElementById('gold-amount');
+        const wen = goldAmount % 1000;
+        const liang = Math.floor(goldAmount / 1000) % 1000;
+        const ding = Math.floor(goldAmount / 1000000);
+    
+        goldElement.innerText = `${ding}锭${liang}两${wen}文`;
+        goldElement.style.color = 'white';
+        goldElement.style.fontSize = '12px'; // 兼容性处理
+    }
+
+    // 单位换算函数
+    function convertPrice(price) {
+        let ding = Math.floor(price / 1000000);
+        price %= 1000000;
+        let liang = Math.floor(price / 1000);
+        let wen = price % 1000;
+    
+        let result = '';
+        if (ding > 0) {
+            result += `${ding}锭 `;
+        }
+        if (liang > 0) {
+            result += `${liang}两 `;
+        }
+        if (wen > 0 || result === '') {
+            result += `${wen}文`;
+        }
+        return result.trim();
+    }
+
+    document.getElementById('gold-container').addEventListener('click', () => {
+        showMerchant('\n作者将“自由经商”功能分离为一个独立的小游戏，也就是你现在看到的这个界面。\n\n这个小游戏原本属于“养宠模拟器”的一部分，即作为游戏中重要货币“金子”的来源之一。 \n\n在分离后，金子没有实际作用，仅作为游戏中累加的记录。');
+    })
+
+
+
+    function saveGameState() {
+        showMerchant('这其实是个存档按钮，你在下次刷新此页面时会加载你的游戏数据');
+        const gameState = {
+            scalpingScore : scalpingScore ,
+            highestAsset : highestAsset ,
+            goldAmount : goldAmount,
+        }
+        storeItems(); // 存储道具数据
+        localStorage.setItem('gameState', JSON.stringify(gameState));
+    }
+        
+    let gameItems = {
+        jinnangItems: [] // 用于存储 jinnangItems 的物品和数量
+    };
+        
+    function storeItems() {
+        gameItems.jinnangItems = jinnangItems.map(item => ({
+            name: item.name,
+            displayName: item.displayName,
+            url: item.url,
+            price: item.price,
+            quantity: item.quantity,
+            description: item.description,
+        }));
+    }
+    
+    // 恢复道具数据
+    function restoreItems() {
+        for (const savedItem of gameItems.jinnangItems) {
+            const item = jinnangItems.find(i => i.name === savedItem.name);
+            if (item) {
+                // 如果道具已存在，更新数量和其他属性
+                item.quantity = savedItem.quantity;
+                item.displayName = savedItem.displayName;
+                item.url = savedItem.url;
+                item.price = savedItem.price;
+                item.description = savedItem.description;
+            }
+        }
+        updateGoldDisplay(goldAmount);
+    }
+
+    function loadGameState() {
+        const savedState = JSON.parse(localStorage.getItem('gameState'));
+        if (!savedState) return;
+        if (savedState) {
+            if (savedState.gameItems) {
+                gameItems = savedState.gameItems;
+                restoreItems(); // 恢复道具数据
+            }
+            scalpingScore = savedState.scalpingScore;
+            highestAsset = savedState.highestAsset;
+            goldAmount = savedState.goldAmount;
+        }
+        updateGoldDisplay(goldAmount);
+        updateScalpingPanel();
+        
+        console.log("读档成功！");
+    }
+    window.onload = function() {
+        if (localStorage.gameState) {
+            loadGameState();
+        }
+        openScalping(closeButton = false);
+    }
+
+    </script>
+</body>
+</html>
